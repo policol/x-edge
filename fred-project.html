@@ -5,6 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <style>
+      /* ─────────────────────────────────────────────
+         DESIGN TOKENS — edit these to restyle the app
+         ───────────────────────────────────────────── */
+      :root {
+        /* Colors */
+        --color-bg: #07000b;
+        --color-text: #ff3b3b;
+        --color-accent: #ff0000;
+        --color-accent-muted: #ff4d4d;
+        --color-surface: #1a0000;
+        --color-surface-hover: #330000;
+        --color-surface-dark: #111;
+        --color-white: #ffffff;
+
+        /* Pause / resume state colors */
+        --color-pause-surface: #001a00;
+        --color-pause-text: #4dff4d;
+        --color-pause-border: #00ff00;
+
+        /* Progress bar */
+        --color-progress-track: #111;
+        --color-progress-fill: #ff4d4d;
+
+        /* Border */
+        --color-border: #ff0000;
+
+        /* Typography */
+        --font-family: sans-serif;
+        --font-size-xs: 14px;
+        --font-size-sm: 18px;
+        --font-size-md: 20px;
+        --font-size-lg: 26px;
+        --font-size-xl: 28px;
+
+        /* Spacing */
+        --spacing-xs: 6px;
+        --spacing-sm: 10px;
+        --spacing-md: 14px;
+        --spacing-lg: 15px;
+
+        /* Shape */
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 12px;
+
+        /* Border width */
+        --border-width: 2px;
+        --border-width-thin: 1px;
+
+        /* Progress bar */
+        --progress-height: 26px;
+        --progress-text-size: 14px;
+
+        /* Layout */
+        --container-max-width: 420px;
+        --transition-progress: width 0.1s linear;
+      }
+
+      /* ─────────────────────────────────────────────
+         BASE
+         ───────────────────────────────────────────── */
       * {
         box-sizing: border-box;
       }
@@ -16,24 +77,56 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        font-family: sans-serif;
-        background: #0b0b0b;
-        color: #ff3b3b;
+        font-family: var(--font-family);
+        background: var(--color-bg);
+        color: var(--color-text);
         padding: 20px;
       }
 
-      .container {
-        text-align: center;
-        width: 100%;
-        max-width: 420px;
+      #config input ::-webkit-outer-spin-button,
+      #config input ::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
       }
 
+      /* Firefox */
+      #config input {
+        appearance: textfield;
+      }
+
+      /* ─────────────────────────────────────────────
+         BUTTONS — shared base
+         ───────────────────────────────────────────── */
+      button {
+        display: block;
+        width: 100%;
+        font-size: var(--font-size-sm);
+        padding: var(--spacing-md);
+        margin: var(--spacing-sm) 0;
+        background: var(--color-surface);
+        color: var(--color-accent-muted);
+        border: var(--border-width) solid var(--color-border);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+      }
+
+      button:active {
+        background: var(--color-surface-hover);
+      }
+
+      button:disabled {
+        filter: grayscale(80%) saturate(0.5) opacity(0.6);
+      }
+
+      /* ─────────────────────────────────────────────
+         FIXED CORNER BUTTONS
+         ───────────────────────────────────────────── */
       .configToggle {
         position: fixed;
-        top: 10px;
-        left: 10px;
-        padding: 10px 14px;
-        font-size: 14px;
+        top: var(--spacing-sm);
+        left: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-xs);
         z-index: 10;
         width: fit-content;
       }
@@ -41,110 +134,99 @@
       .pauseBtn {
         position: fixed;
         top: 54px;
-        left: 10px;
-        padding: 10px 14px;
-        font-size: 14px;
+        left: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-xs);
         z-index: 10;
         width: fit-content;
-        background: #1a0000;
-        color: #ff4d4d;
-        border: 2px solid #ff0000;
-        border-radius: 10px;
-        cursor: pointer;
+        /* inherits base button styles */
       }
 
       .pauseBtn.paused {
-        background: #001a00;
-        color: #4dff4d;
-        border-color: #00ff00;
+        background: var(--color-pause-surface);
+        color: var(--color-pause-text);
+        border-color: var(--color-pause-border);
       }
 
       .restartBtn {
         position: fixed;
-        top: 10px;
-        right: 10px;
-        padding: 10px 14px;
-        font-size: 14px;
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-xs);
         z-index: 10;
-        background: #1a0000;
-        color: #ff4d4d;
-        border: 2px solid #ff0000;
-        border-radius: 10px;
-        cursor: pointer;
         width: fit-content;
       }
 
-      button:disabled {
-        filter: grayscale(80%) saturate(0.5) opacity(0.6);
-      }
-
-      button {
-        display: block;
+      /* ─────────────────────────────────────────────
+         LAYOUT
+         ───────────────────────────────────────────── */
+      .container {
+        text-align: center;
         width: 100%;
-        font-size: 18px;
-        padding: 14px;
-        margin: 10px 0;
-        background: #1a0000;
-        color: #ff4d4d;
-        border: 2px solid #ff0000;
-        border-radius: 10px;
-        cursor: pointer;
+        max-width: var(--container-max-width);
       }
 
-      button:active {
-        background: #330000;
-      }
-
-      #state {
-        font-size: 28px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        color: #ff0000;
-      }
-
+      /* ─────────────────────────────────────────────
+         CONFIG PANEL
+         ───────────────────────────────────────────── */
       #config {
         display: none;
-        margin-top: 15px;
+        margin-top: var(--spacing-lg);
         width: 100%;
-        max-width: 420px;
-        grid-template-columns: 1fr 1fr 1fr 1fr;
-        gap: 10px;
+        max-width: var(--container-max-width);
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        gap: var(--spacing-sm);
         align-items: center;
       }
 
       #config label {
-        font-size: 14px;
+        font-size: var(--font-size-xs);
+        text-align: right;
       }
 
       #config input {
         width: 100%;
         padding: 8px;
-        background: #111;
-        color: #ff4d4d;
-        border: 1px solid #ff0000;
-        border-radius: 6px;
-        font-size: 14px;
+        background: var(--color-surface-dark);
+        color: var(--color-accent-muted);
+        border: var(--border-width-thin) solid var(--color-border);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-xs);
+      }
+
+      /* ─────────────────────────────────────────────
+         STATE & COUNTERS
+         ───────────────────────────────────────────── */
+      #state {
+        font-size: var(--font-size-xl);
+        font-weight: bold;
+        margin-bottom: var(--spacing-sm);
+        color: var(--color-accent);
       }
 
       #output {
-        font-size: 20px;
-        margin-top: 10px;
+        font-size: var(--font-size-md);
+        margin-top: var(--spacing-sm);
       }
 
       #count {
-        font-size: 26px;
-        margin-top: 10px;
+        font-size: var(--font-size-lg);
+        margin-top: var(--spacing-sm);
         font-weight: bold;
-        color: #ff0000;
+        color: var(--color-accent);
       }
 
+      /* ─────────────────────────────────────────────
+         PROGRESS BAR
+         ───────────────────────────────────────────── */
       #progressContainer {
         width: 100%;
-        height: 26px;
-        background: #111;
-        border: 1px solid #ff0000;
-        border-radius: 12px;
-        margin-top: 15px;
+        height: var(--progress-height);
+        background: var(--color-progress-track);
+        border: var(--border-width-thin) solid var(--color-border);
+        border-radius: var(--radius-lg);
+        margin-top: var(--spacing-lg);
         overflow: hidden;
         position: relative;
       }
@@ -152,9 +234,9 @@
       #progressBar {
         height: 100%;
         width: 0%;
-        background: #ff4d4d;
-        border-radius: 12px 0 0 12px;
-        transition: width 0.1s linear;
+        background: var(--color-progress-fill);
+        border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+        transition: var(--transition-progress);
       }
 
       #progressText {
@@ -162,13 +244,16 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        font-size: 14px;
+        font-size: var(--progress-text-size);
         font-weight: bold;
-        color: white;
+        color: var(--color-white);
         pointer-events: none;
       }
 
-      @media (max-width: 600px) {
+      /* ─────────────────────────────────────────────
+         RESPONSIVE
+         ───────────────────────────────────────────── */
+      /* @media (max-width: 600px) {
         #config {
           grid-template-columns: 1fr 1fr;
         }
@@ -184,29 +269,36 @@
         #config button {
           grid-column: span 1;
         }
-      }
+      } */
     </style>
   </head>
 
   <body>
     <button class="configToggle" onclick="toggleConfig()">Config</button>
-    <button id="pauseBtn" class="pauseBtn" onclick="togglePause()" disabled>Pause</button>
+    <button id="pauseBtn" class="pauseBtn" onclick="togglePause()" disabled>
+      Pause
+    </button>
     <button class="restartBtn" onclick="restartSession()">Restart</button>
 
     <div id="config">
-      <label>Edge Until Min</label>
+      <label>Edge Until</label>
+      <label>Min</label>
       <input id="untilMin" type="number" value="2" />
 
       <label>Max</label>
       <input id="untilMax" type="number" value="6" />
 
-      <label>Edge Duration Min</label>
+      <label>Edge Duration</label>
+      <label>Min</label>
+
       <input id="durMin" type="number" value="2" />
 
       <label>Max</label>
       <input id="durMax" type="number" value="8" />
 
-      <label>Rest Duration Min</label>
+      <label>Rest Duration</label>
+      <label>Min</label>
+
       <input id="restMin" type="number" value="30" />
 
       <label>Max</label>
@@ -215,12 +307,12 @@
       <label>Total Edges</label>
       <input id="totalEdges" type="number" value="5" />
 
-      <button style="grid-column: span 4" onclick="randomizeAll()">
+      <button style="grid-column: span 5" onclick="randomizeAll()">
         Randomize Parameters
       </button>
     </div>
 
-    <div class="container">
+    <div class="container" id="main">
       <div id="state">Idle</div>
 
       <button id="startButton" onclick="handleButton()">Start Session</button>
@@ -236,13 +328,53 @@
     </div>
 
     <script>
-      let edgesLeft = Number(document.getElementById("totalEdges").value);
+      // ─────────────────────────────────────────────────────────────────────
+      // RANDOMIZATION BOUNDS
+      // These define the min/max ranges used when "Randomize Parameters" is
+      // clicked. Adjust these to change the pool of possible random values.
+      // ─────────────────────────────────────────────────────────────────────
+
+      // "Edge Until" — how many minutes to build up before edging (minutes)
+      const RAND_UNTIL_MIN_LO = 1; // lowest possible untilMin
+      const RAND_UNTIL_MIN_HI = 2; // highest possible untilMin
+      const RAND_UNTIL_MAX_PAD_LO = 2; // untilMax is at least untilMin + this
+      const RAND_UNTIL_MAX_PAD_HI = 5; // untilMax is at most untilMin + this
+
+      // "Edge Duration" — how long to hold the edge (minutes)
+      const RAND_DUR_MIN_LO = 1;
+      const RAND_DUR_MIN_HI = 3;
+      const RAND_DUR_MAX_PAD_LO = 1;
+      const RAND_DUR_MAX_PAD_HI = 10;
+
+      // "Rest Duration" — cool-down between edges (seconds)
+      const RAND_REST_MIN_LO = 10;
+      const RAND_REST_MIN_HI = 25;
+      const RAND_REST_MAX_PAD_LO = 10;
+      const RAND_REST_MAX_PAD_HI = 40;
+
+      // Total number of edges in a randomized session
+      const RAND_EDGES_LO = 5;
+      const RAND_EDGES_HI = 12;
+
+      // ─────────────────────────────────────────────────────────────────────
+      // DEFAULT INPUT VALUES (mirrors the HTML value="" attributes)
+      // ─────────────────────────────────────────────────────────────────────
+      const DEFAULT_UNTIL_MIN = 1;
+      const DEFAULT_UNTIL_MAX = 5;
+      const DEFAULT_DUR_MIN = 2;
+      const DEFAULT_DUR_MAX = 8;
+      const DEFAULT_REST_MIN = 30;
+      const DEFAULT_REST_MAX = 90;
+      const DEFAULT_TOTAL_EDGES = 5;
+
+      // ─────────────────────────────────────────────────────────────────────
+      // RUNTIME STATE
+      // ─────────────────────────────────────────────────────────────────────
+      let edgesLeft = DEFAULT_TOTAL_EDGES;
       let timerInterval = null;
       let currentState = null;
 
-      // Tracks the exact timestamp when the pre-edge timer finished naturally
       let preEdgeTimerEndTime = null;
-      // Stores the delay (in seconds) between pre-edge end and user clicking "Edge"
       let edgeDelaySec = 0;
 
       const startBtn = document.getElementById("startButton");
@@ -251,11 +383,15 @@
       const configBtn = document.querySelector(".configToggle");
       const configPanel = document.getElementById("config");
       const pauseBtn = document.getElementById("pauseBtn");
+      const mainContainer = document.getElementById("main");
 
       let isPaused = false;
-      let pausedRemainingSec = 0;     // remaining seconds when paused
-      let pausedOnComplete = null;    // preserve the onComplete callback across pause
+      let pausedRemainingSec = 0;
+      let pausedOnComplete = null;
 
+      // ─────────────────────────────────────────────────────────────────────
+      // HELPERS
+      // ─────────────────────────────────────────────────────────────────────
       function setState(name) {
         stateLabel.textContent = name;
       }
@@ -267,18 +403,30 @@
       }
 
       function toggleConfig() {
-        const cfg = document.getElementById("config");
-        cfg.style.display = cfg.style.display === "grid" ? "none" : "grid";
+        configPanel.style.display =
+          configPanel.style.display === "grid" ? "none" : "grid";
+        if (configPanel.style.display === "grid")
+          mainContainer.style.display = "none";
+        else mainContainer.style.display = "block";
       }
 
       function randomizeAll() {
-        const untilMin = rand(0.2, 0.5);
-        const untilMax = rand(untilMin + 0.2, 0.1);
-        const durMin = rand(0.1, 0.4);
-        const durMax = rand(durMin + 0.2, 0.12);
-        const restMin = rand(0.1, 0.3);
-        const restMax = rand(restMin + 0.1, 0.12);
-        const totalEdgesRandom = rand(0.3, 0.1);
+        const untilMin = rand(RAND_UNTIL_MIN_LO, RAND_UNTIL_MIN_HI);
+        const untilMax = rand(
+          untilMin + RAND_UNTIL_MAX_PAD_LO,
+          untilMin + RAND_UNTIL_MAX_PAD_HI,
+        );
+        const durMin = rand(RAND_DUR_MIN_LO, RAND_DUR_MIN_HI);
+        const durMax = rand(
+          durMin + RAND_DUR_MAX_PAD_LO,
+          durMin + RAND_DUR_MAX_PAD_HI,
+        );
+        const restMin = rand(RAND_REST_MIN_LO, RAND_REST_MIN_HI);
+        const restMax = rand(
+          restMin + RAND_REST_MAX_PAD_LO,
+          restMin + RAND_REST_MAX_PAD_HI,
+        );
+        const totalEdgesRandom = rand(RAND_EDGES_LO, RAND_EDGES_HI);
 
         document.getElementById("untilMin").value = untilMin;
         document.getElementById("untilMax").value = untilMax;
@@ -299,27 +447,34 @@
         edgeDelaySec = 0;
       }
 
+      // ─────────────────────────────────────────────────────────────────────
+      // PAUSE / RESUME
+      // ─────────────────────────────────────────────────────────────────────
       function togglePause() {
         if (!isPaused) {
-          // ── PAUSE ──
           isPaused = true;
           clearInterval(timerInterval);
-          // Read remaining time from the display so we resume exactly where we left off
           const parts = progressText.textContent.split(":").map(Number);
           pausedRemainingSec = parts[0] * 60 + parts[1];
           pauseBtn.textContent = "Resume";
           pauseBtn.classList.add("paused");
+          startBtn.disabled = true;
+          document.querySelector(".restartBtn").disabled = true;
           setState("Paused");
         } else {
-          // ── RESUME ──
           isPaused = false;
           pauseBtn.textContent = "Pause";
           pauseBtn.classList.remove("paused");
+          startBtn.disabled = currentState === "Edging";
+          document.querySelector(".restartBtn").disabled = false;
           setState(currentState);
           startProgress(pausedRemainingSec, pausedOnComplete);
         }
       }
 
+      // ─────────────────────────────────────────────────────────────────────
+      // SESSION CONTROL
+      // ─────────────────────────────────────────────────────────────────────
       function handleButton() {
         if (currentState === "Finished" || edgesLeft <= 0) {
           restartSession();
@@ -332,6 +487,7 @@
         startBtn.disabled = false;
         configBtn.disabled = false;
         configPanel.style.display = "none";
+        mainContainer.style.display = "block"
         pauseBtn.disabled = true;
         pauseBtn.textContent = "Pause";
         pauseBtn.classList.remove("paused");
@@ -368,8 +524,7 @@
         }
 
         if (currentState === "Resting" || currentState === null) {
-          // ── PRE-EDGE phase ──────────────────────────────────────────────
-          // Lock config on session start
+          // ── PRE-EDGE ──────────────────────────────────────────────────────
           if (currentState === null) {
             configBtn.disabled = true;
             configPanel.style.display = "none";
@@ -389,23 +544,18 @@
             "Edge! you only have " + duration + " min";
           startBtn.textContent = "Edge";
 
-          // Start the countdown; when it finishes naturally, record the end time
           startProgress(duration * 60, () => {
             preEdgeTimerEndTime = Date.now();
           });
-
         } else if (currentState === "Pre-Edge") {
-          // ── EDGING phase ────────────────────────────────────────────────
+          // ── EDGING ────────────────────────────────────────────────────────
           currentState = "Edging";
           setState("Edging");
 
-          // Calculate how many seconds passed since the pre-edge timer ended.
-          // If the user clicked before the timer finished, delay is 0.
-          if (preEdgeTimerEndTime !== null) {
-            edgeDelaySec = (Date.now() - preEdgeTimerEndTime) / 1000;
-          } else {
-            edgeDelaySec = 0;
-          }
+          edgeDelaySec =
+            preEdgeTimerEndTime !== null
+              ? (Date.now() - preEdgeTimerEndTime) / 1000
+              : 0;
 
           edgesLeft--;
           document.getElementById("count").textContent =
@@ -415,8 +565,6 @@
             document.getElementById("durMin").value,
             document.getElementById("durMax").value,
           );
-
-          // Add the reaction delay to edging time so total stimulation is preserved
           const edgingDuration = baseDuration * 60 + edgeDelaySec;
 
           document.getElementById("output").textContent =
@@ -430,9 +578,8 @@
           startBtn.textContent = "Stay.";
           startBtn.disabled = true;
           startProgress(edgingDuration);
-
         } else if (currentState === "Edging") {
-          // ── RESTING phase ───────────────────────────────────────────────
+          // ── RESTING ───────────────────────────────────────────────────────
           currentState = "Resting";
           setState("Resting");
 
@@ -440,8 +587,6 @@
             document.getElementById("restMin").value,
             document.getElementById("restMax").value,
           );
-
-          // Subtract the reaction delay from rest so total session time stays consistent
           const restDuration = Math.max(0, baseDuration - edgeDelaySec);
 
           document.getElementById("output").textContent =
@@ -457,6 +602,9 @@
         }
       }
 
+      // ─────────────────────────────────────────────────────────────────────
+      // PROGRESS BAR
+      // ─────────────────────────────────────────────────────────────────────
       function formatTime(sec) {
         sec = Math.ceil(sec);
         const m = Math.floor(sec / 60);
@@ -464,10 +612,6 @@
         return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
       }
 
-      /**
-       * @param {number} seconds - total duration
-       * @param {Function} [onComplete] - optional callback fired when timer ends naturally
-       */
       function startProgress(seconds, onComplete) {
         resetProgress();
         pausedOnComplete = onComplete || null;
@@ -486,12 +630,8 @@
 
           if (elapsedMs >= totalMs) {
             clearInterval(timerInterval);
-
             if (onComplete) onComplete();
-
-            if (currentState !== "Pre-Edge") {
-              nextState();
-            }
+            if (currentState !== "Pre-Edge") nextState();
           }
         }, 100);
       }
@@ -502,6 +642,9 @@
         progressText.textContent = "00:00";
       }
 
+      // ─────────────────────────────────────────────────────────────────────
+      // INIT
+      // ─────────────────────────────────────────────────────────────────────
       document.getElementById("count").textContent = "Edges Left: " + edgesLeft;
     </script>
   </body>

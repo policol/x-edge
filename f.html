@@ -1,0 +1,606 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Edge Timer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: sans-serif;
+        background: #0b0b0b;
+        color: #ff3b3b;
+        padding: 20px;
+      }
+
+      .container {
+        text-align: center;
+        width: 100%;
+        max-width: 420px;
+      }
+
+      .configToggle {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        padding: 10px 14px;
+        font-size: 14px;
+        z-index: 10;
+        width: fit-content;
+      }
+
+      .pauseBtn {
+        position: fixed;
+        top: 54px;
+        left: 10px;
+        padding: 10px 14px;
+        font-size: 14px;
+        z-index: 10;
+        width: fit-content;
+        background: #1a0000;
+        color: #ff4d4d;
+        border: 2px solid #ff0000;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .pauseBtn.paused {
+        background: #001a00;
+        color: #4dff4d;
+        border-color: #00ff00;
+      }
+
+      .restartBtn {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        padding: 10px 14px;
+        font-size: 14px;
+        z-index: 10;
+        background: #1a0000;
+        color: #ff4d4d;
+        border: 2px solid #ff0000;
+        border-radius: 10px;
+        cursor: pointer;
+        width: fit-content;
+      }
+
+      button:disabled {
+        filter: grayscale(80%) saturate(0.5) opacity(0.6);
+      }
+
+      button {
+        display: block;
+        width: 100%;
+        font-size: 18px;
+        padding: 14px;
+        margin: 10px 0;
+        background: #1a0000;
+        color: #ff4d4d;
+        border: 2px solid #ff0000;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      button:active {
+        background: #330000;
+      }
+
+      #state {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #ff0000;
+      }
+
+      #config {
+        display: none;
+        margin-top: 15px;
+        width: 100%;
+        max-width: 420px;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+
+      #config label {
+        font-size: 14px;
+      }
+
+      #config input {
+        width: 100%;
+        padding: 8px;
+        background: #111;
+        color: #ff4d4d;
+        border: 1px solid #ff0000;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+
+      #output {
+        font-size: 20px;
+        margin-top: 10px;
+      }
+
+      #count {
+        font-size: 26px;
+        margin-top: 10px;
+        font-weight: bold;
+        color: #ff0000;
+      }
+
+      #progressContainer {
+        width: 100%;
+        height: 26px;
+        background: #111;
+        border: 1px solid #ff0000;
+        border-radius: 12px;
+        margin-top: 15px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      #progressBar {
+        height: 100%;
+        width: 0%;
+        background: #ff4d4d;
+        border-radius: 12px 0 0 12px;
+        transition: width 0.1s linear;
+      }
+
+      #progressText {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+        pointer-events: none;
+      }
+
+      #notifBanner {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #1a0a00;
+        border-top: 2px solid #ff6600;
+        color: #ffaa44;
+        font-size: 13px;
+        padding: 10px 14px;
+        display: none;
+        z-index: 20;
+        text-align: center;
+      }
+
+      #notifBanner button {
+        display: inline-block;
+        width: auto;
+        margin: 4px 6px 0;
+        padding: 6px 14px;
+        font-size: 13px;
+        border-color: #ff6600;
+        color: #ffaa44;
+        background: #2a1000;
+      }
+
+      @media (max-width: 600px) {
+        #config {
+          grid-template-columns: 1fr 1fr;
+        }
+        #config button {
+          grid-column: span 2;
+        }
+      }
+
+      @media (max-width: 380px) {
+        #config {
+          grid-template-columns: 1fr;
+        }
+        #config button {
+          grid-column: span 1;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="notifBanner">
+      🔔 Allow notifications to get alerts when screen is off
+      <br />
+      <button onclick="requestNotifPermission()">Allow</button>
+      <button onclick="dismissBanner()">Dismiss</button>
+    </div>
+
+    <button class="configToggle" onclick="toggleConfig()">Config</button>
+    <button id="pauseBtn" class="pauseBtn" onclick="togglePause()" disabled>
+      Pause
+    </button>
+    <button class="restartBtn" onclick="restartSession()">Restart</button>
+
+    <div id="config">
+      <label>Edge Until Min</label>
+      <input id="untilMin" type="number" value="2" />
+
+      <label>Max</label>
+      <input id="untilMax" type="number" value="6" />
+
+      <label>Edge Duration Min</label>
+      <input id="durMin" type="number" value="2" />
+
+      <label>Max</label>
+      <input id="durMax" type="number" value="8" />
+
+      <label>Rest Duration Min</label>
+      <input id="restMin" type="number" value="30" />
+
+      <label>Max</label>
+      <input id="restMax" type="number" value="90" />
+
+      <label>Total Edges</label>
+      <input id="totalEdges" type="number" value="5" />
+
+      <button style="grid-column: span 4" onclick="randomizeAll()">
+        Randomize Parameters
+      </button>
+    </div>
+
+    <div class="container">
+      <div id="state">Idle</div>
+
+      <button id="startButton" onclick="handleButton()">Start Session</button>
+
+      <p id="output"></p>
+
+      <p id="count">Edges Left: 0</p>
+
+      <div id="progressContainer">
+        <div id="progressBar"></div>
+        <div id="progressText">00:00</div>
+      </div>
+    </div>
+
+    <script>
+      let edgesLeft = Number(document.getElementById("totalEdges").value);
+      let timerInterval = null;
+      let currentState = null;
+
+      // Tracks the exact timestamp when the pre-edge timer finished naturally
+      let preEdgeTimerEndTime = null;
+      // Stores the delay (in seconds) between pre-edge end and user clicking "Edge"
+      let edgeDelaySec = 0;
+
+      const startBtn = document.getElementById("startButton");
+      const stateLabel = document.getElementById("state");
+      const progressText = document.getElementById("progressText");
+      const configBtn = document.querySelector(".configToggle");
+      const configPanel = document.getElementById("config");
+      const pauseBtn = document.getElementById("pauseBtn");
+
+      let isPaused = false;
+      let pausedRemainingSec = 0;
+      let pausedOnComplete = null;
+
+      // ── NOTIFICATION SYSTEM ──────────────────────────────────────────────────
+
+      // Vibration patterns (ms on/off)
+      const VIBRATE = {
+        gentle: [200, 100, 200],
+        urgent: [400, 100, 400, 100, 400],
+        finish: [200, 80, 200, 80, 200, 80, 600],
+      };
+
+      // Vibrate wrapper (graceful no-op if unsupported)
+      function vibrate(pattern) {
+        if (navigator.vibrate) navigator.vibrate(pattern);
+      }
+
+      // System notification wrapper
+      function notify(title, body) {
+        if (Notification.permission === "granted") {
+          new Notification(title, {
+            body,
+            icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23ff0000'/%3E%3C/svg%3E",
+            tag: "edge-timer",
+            renotify: true,
+          });
+        }
+      }
+
+      // Central alert function called at each state transition
+      function alert_transition(event) {
+        switch (event) {
+          case "pre-edge-end":
+            vibrate(VIBRATE.urgent);
+            notify("⚡ EDGE NOW", "Pre-edge timer ended — edge immediately!");
+            break;
+          case "edging-end":
+            vibrate(VIBRATE.gentle);
+            notify("😮‍💨 Rest", "Edging done — time to rest.");
+            break;
+          case "rest-end":
+            vibrate(VIBRATE.gentle);
+            notify("🔁 Next Edge", "Rest over — next pre-edge starting.");
+            break;
+          case "finish":
+            vibrate(VIBRATE.finish);
+            notify("✅ Session Done", "All edges complete. Well done.");
+            break;
+        }
+      }
+
+      // Permission banner logic
+      function showBannerIfNeeded() {
+        if ("Notification" in window && Notification.permission === "default") {
+          document.getElementById("notifBanner").style.display = "block";
+        }
+      }
+      function requestNotifPermission() {
+        Notification.requestPermission().then(() => dismissBanner());
+      }
+      function dismissBanner() {
+        document.getElementById("notifBanner").style.display = "none";
+      }
+
+      showBannerIfNeeded();
+
+      function setState(name) {
+        stateLabel.textContent = name;
+      }
+
+      function rand(min, max) {
+        min = Number(min);
+        max = Number(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function toggleConfig() {
+        const cfg = document.getElementById("config");
+        cfg.style.display = cfg.style.display === "grid" ? "none" : "grid";
+      }
+
+      function randomizeAll() {
+        const untilMin = rand(3, 8);
+        const untilMax = rand(untilMin + 2, untilMin + 10);
+        const durMin = rand(1, 3);
+        const durMax = rand(durMin + 1, durMin + 5);
+        const restMin = rand(10, 25);
+        const restMax = rand(restMin + 10, restMin + 40);
+        const totalEdgesRandom = rand(5, 12);
+
+        document.getElementById("untilMin").value = untilMin;
+        document.getElementById("untilMax").value = untilMax;
+        document.getElementById("durMin").value = durMin;
+        document.getElementById("durMax").value = durMax;
+        document.getElementById("restMin").value = restMin;
+        document.getElementById("restMax").value = restMax;
+        document.getElementById("totalEdges").value = totalEdgesRandom;
+
+        edgesLeft = totalEdgesRandom;
+        document.getElementById("count").textContent =
+          "Edges Left: " + edgesLeft;
+        currentState = null;
+        setState("Idle");
+        resetProgress();
+        startBtn.textContent = "Start Session";
+        preEdgeTimerEndTime = null;
+        edgeDelaySec = 0;
+      }
+
+      function togglePause() {
+        if (!isPaused) {
+          // ── PAUSE ──
+          isPaused = true;
+          clearInterval(timerInterval);
+          // Read remaining time from the display so we resume exactly where we left off
+          const parts = progressText.textContent.split(":").map(Number);
+          pausedRemainingSec = parts[0] * 60 + parts[1];
+          pauseBtn.textContent = "Resume";
+          pauseBtn.classList.add("paused");
+          setState("Paused");
+        } else {
+          // ── RESUME ──
+          isPaused = false;
+          pauseBtn.textContent = "Pause";
+          pauseBtn.classList.remove("paused");
+          setState(currentState);
+          startProgress(pausedRemainingSec, pausedOnComplete);
+        }
+      }
+
+      function handleButton() {
+        if (currentState === "Finished" || edgesLeft <= 0) {
+          restartSession();
+        } else {
+          nextState();
+        }
+      }
+
+      function restartSession() {
+        startBtn.disabled = false;
+        configBtn.disabled = false;
+        configPanel.style.display = "none";
+        pauseBtn.disabled = true;
+        pauseBtn.textContent = "Pause";
+        pauseBtn.classList.remove("paused");
+        isPaused = false;
+        pausedRemainingSec = 0;
+        pausedOnComplete = null;
+        edgesLeft = Number(document.getElementById("totalEdges").value);
+        currentState = null;
+        setState("Idle");
+
+        document.getElementById("count").textContent =
+          "Edges Left: " + edgesLeft;
+        document.getElementById("output").textContent = "";
+
+        resetProgress();
+        startBtn.textContent = "Start Session";
+        preEdgeTimerEndTime = null;
+        edgeDelaySec = 0;
+      }
+
+      async function nextState() {
+        startBtn.disabled = false;
+
+        if (edgesLeft <= 0) {
+          document.getElementById("output").textContent = "Finished!";
+          startBtn.textContent = "Restart Session";
+          currentState = "Finished";
+          setState("Finished");
+          resetProgress();
+          pauseBtn.disabled = true;
+          pauseBtn.textContent = "Pause";
+          pauseBtn.classList.remove("paused");
+          alert_transition("finish");
+          return;
+        }
+
+        if (currentState === "Resting" || currentState === null) {
+          // ── PRE-EDGE phase ──────────────────────────────────────────────
+          // Lock config on session start
+          if (currentState === null) {
+            configBtn.disabled = true;
+            configPanel.style.display = "none";
+            pauseBtn.disabled = false;
+          }
+          currentState = "Pre-Edge";
+          setState("Pre-Edge");
+          preEdgeTimerEndTime = null;
+          edgeDelaySec = 0;
+
+          const duration = rand(
+            document.getElementById("untilMin").value,
+            document.getElementById("untilMax").value,
+          );
+
+          document.getElementById("output").textContent =
+            "Edge! you only have " + duration + " min";
+          startBtn.textContent = "Edge";
+
+          // Start the countdown; when it finishes naturally, record the end time
+          startProgress(duration * 60, () => {
+            preEdgeTimerEndTime = Date.now();
+            alert_transition("pre-edge-end");
+          });
+        } else if (currentState === "Pre-Edge") {
+          // ── EDGING phase ────────────────────────────────────────────────
+          currentState = "Edging";
+          setState("Edging");
+
+          // Calculate how many seconds passed since the pre-edge timer ended.
+          // If the user clicked before the timer finished, delay is 0.
+          if (preEdgeTimerEndTime !== null) {
+            edgeDelaySec = (Date.now() - preEdgeTimerEndTime) / 1000;
+          } else {
+            edgeDelaySec = 0;
+          }
+
+          edgesLeft--;
+          document.getElementById("count").textContent =
+            "Edges Left: " + edgesLeft;
+
+          const baseDuration = rand(
+            document.getElementById("durMin").value,
+            document.getElementById("durMax").value,
+          );
+
+          // Add the reaction delay to edging time so total stimulation is preserved
+          const edgingDuration = baseDuration * 60 + edgeDelaySec;
+
+          document.getElementById("output").textContent =
+            "Stay at the edge for " +
+            baseDuration +
+            " min" +
+            (edgeDelaySec > 0
+              ? " (+" + edgeDelaySec.toFixed(1) + "s delay added)"
+              : "");
+
+          startBtn.textContent = "Stay.";
+          startBtn.disabled = true;
+          startProgress(edgingDuration, () => alert_transition("edging-end"));
+        } else if (currentState === "Edging") {
+          // ── RESTING phase ───────────────────────────────────────────────
+          currentState = "Resting";
+          setState("Resting");
+
+          const baseDuration = rand(
+            document.getElementById("restMin").value,
+            document.getElementById("restMax").value,
+          );
+
+          // Subtract the reaction delay from rest so total session time stays consistent
+          const restDuration = Math.max(0, baseDuration - edgeDelaySec);
+
+          document.getElementById("output").textContent =
+            "Rest for " +
+            restDuration.toFixed(1) +
+            " sec" +
+            (edgeDelaySec > 0
+              ? " (-" + edgeDelaySec.toFixed(1) + "s delay removed)"
+              : "");
+
+          startBtn.textContent = "Resting";
+          startProgress(restDuration, () => alert_transition("rest-end"));
+        }
+      }
+
+      function formatTime(sec) {
+        sec = Math.ceil(sec);
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+      }
+
+      /**
+       * @param {number} seconds - total duration
+       * @param {Function} [onComplete] - optional callback fired when timer ends naturally
+       */
+      function startProgress(seconds, onComplete) {
+        resetProgress();
+        pausedOnComplete = onComplete || null;
+
+        const progressBar = document.getElementById("progressBar");
+        const startTime = Date.now();
+        const totalMs = seconds * 1000;
+
+        timerInterval = setInterval(() => {
+          const elapsedMs = Date.now() - startTime;
+          const remaining = (totalMs - elapsedMs) / 1000;
+
+          const percent = Math.min((elapsedMs / totalMs) * 100, 100);
+          progressBar.style.width = percent + "%";
+          progressText.textContent = formatTime(Math.max(0, remaining));
+
+          if (elapsedMs >= totalMs) {
+            clearInterval(timerInterval);
+
+            if (onComplete) onComplete();
+
+            if (currentState !== "Pre-Edge") {
+              nextState();
+            }
+          }
+        }, 100);
+      }
+
+      function resetProgress() {
+        clearInterval(timerInterval);
+        document.getElementById("progressBar").style.width = "0%";
+        progressText.textContent = "00:00";
+      }
+
+      document.getElementById("count").textContent = "Edges Left: " + edgesLeft;
+    </script>
+  </body>
+</html>
