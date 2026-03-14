@@ -38,6 +38,27 @@
         width: fit-content;
       }
 
+      .pauseBtn {
+        position: fixed;
+        top: 54px;
+        left: 10px;
+        padding: 10px 14px;
+        font-size: 14px;
+        z-index: 10;
+        width: fit-content;
+        background: #1a0000;
+        color: #ff4d4d;
+        border: 2px solid #ff0000;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .pauseBtn.paused {
+        background: #001a00;
+        color: #4dff4d;
+        border-color: #00ff00;
+      }
+
       .restartBtn {
         position: fixed;
         top: 10px;
@@ -169,6 +190,7 @@
 
   <body>
     <button class="configToggle" onclick="toggleConfig()">Config</button>
+    <button id="pauseBtn" class="pauseBtn" onclick="togglePause()" disabled>Pause</button>
     <button class="restartBtn" onclick="restartSession()">Restart</button>
 
     <div id="config">
@@ -226,6 +248,13 @@
       const startBtn = document.getElementById("startButton");
       const stateLabel = document.getElementById("state");
       const progressText = document.getElementById("progressText");
+      const configBtn = document.querySelector(".configToggle");
+      const configPanel = document.getElementById("config");
+      const pauseBtn = document.getElementById("pauseBtn");
+
+      let isPaused = false;
+      let pausedRemainingSec = 0;     // remaining seconds when paused
+      let pausedOnComplete = null;    // preserve the onComplete callback across pause
 
       function setState(name) {
         stateLabel.textContent = name;
@@ -270,6 +299,27 @@
         edgeDelaySec = 0;
       }
 
+      function togglePause() {
+        if (!isPaused) {
+          // ── PAUSE ──
+          isPaused = true;
+          clearInterval(timerInterval);
+          // Read remaining time from the display so we resume exactly where we left off
+          const parts = progressText.textContent.split(":").map(Number);
+          pausedRemainingSec = parts[0] * 60 + parts[1];
+          pauseBtn.textContent = "Resume";
+          pauseBtn.classList.add("paused");
+          setState("Paused");
+        } else {
+          // ── RESUME ──
+          isPaused = false;
+          pauseBtn.textContent = "Pause";
+          pauseBtn.classList.remove("paused");
+          setState(currentState);
+          startProgress(pausedRemainingSec, pausedOnComplete);
+        }
+      }
+
       function handleButton() {
         if (currentState === "Finished" || edgesLeft <= 0) {
           restartSession();
@@ -280,6 +330,14 @@
 
       function restartSession() {
         startBtn.disabled = false;
+        configBtn.disabled = false;
+        configPanel.style.display = "none";
+        pauseBtn.disabled = true;
+        pauseBtn.textContent = "Pause";
+        pauseBtn.classList.remove("paused");
+        isPaused = false;
+        pausedRemainingSec = 0;
+        pausedOnComplete = null;
         edgesLeft = Number(document.getElementById("totalEdges").value);
         currentState = null;
         setState("Idle");
@@ -303,11 +361,20 @@
           currentState = "Finished";
           setState("Finished");
           resetProgress();
+          pauseBtn.disabled = true;
+          pauseBtn.textContent = "Pause";
+          pauseBtn.classList.remove("paused");
           return;
         }
 
         if (currentState === "Resting" || currentState === null) {
           // ── PRE-EDGE phase ──────────────────────────────────────────────
+          // Lock config on session start
+          if (currentState === null) {
+            configBtn.disabled = true;
+            configPanel.style.display = "none";
+            pauseBtn.disabled = false;
+          }
           currentState = "Pre-Edge";
           setState("Pre-Edge");
           preEdgeTimerEndTime = null;
@@ -357,7 +424,7 @@
             baseDuration +
             " min" +
             (edgeDelaySec > 0
-              ? " (+" + edgeDelaySec.toFixed(1) + "s punishment added)"
+              ? " (+" + edgeDelaySec.toFixed(1) + "s delay added)"
               : "");
 
           startBtn.textContent = "Stay.";
@@ -382,7 +449,7 @@
             restDuration.toFixed(1) +
             " sec" +
             (edgeDelaySec > 0
-              ? " (-" + edgeDelaySec.toFixed(1) + "s punishment removed)"
+              ? " (-" + edgeDelaySec.toFixed(1) + "s delay removed)"
               : "");
 
           startBtn.textContent = "Resting";
@@ -403,6 +470,7 @@
        */
       function startProgress(seconds, onComplete) {
         resetProgress();
+        pausedOnComplete = onComplete || null;
 
         const progressBar = document.getElementById("progressBar");
         const startTime = Date.now();
