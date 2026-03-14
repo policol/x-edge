@@ -218,6 +218,11 @@
       let timerInterval = null;
       let currentState = null;
 
+      // Tracks the exact timestamp when the pre-edge timer finished naturally
+      let preEdgeTimerEndTime = null;
+      // Stores the delay (in seconds) between pre-edge end and user clicking "Edge"
+      let edgeDelaySec = 0;
+
       const startBtn = document.getElementById("startButton");
       const stateLabel = document.getElementById("state");
       const progressText = document.getElementById("progressText");
@@ -238,13 +243,13 @@
       }
 
       function randomizeAll() {
-        const untilMin = rand(2, 5);
-        const untilMax = rand(untilMin + 2, 10);
-        const durMin = rand(1, 4);
-        const durMax = rand(durMin + 2, 12);
-        const restMin = rand(10, 30);
-        const restMax = rand(restMin + 10, 120);
-        const totalEdgesRandom = rand(3, 10);
+        const untilMin = rand(0.2, 0.5);
+        const untilMax = rand(untilMin + 0.2, 0.1);
+        const durMin = rand(0.1, 0.4);
+        const durMax = rand(durMin + 0.2, 0.12);
+        const restMin = rand(0.1, 0.3);
+        const restMax = rand(restMin + 0.1, 0.12);
+        const totalEdgesRandom = rand(0.3, 0.1);
 
         document.getElementById("untilMin").value = untilMin;
         document.getElementById("untilMax").value = untilMax;
@@ -261,6 +266,8 @@
         setState("Idle");
         resetProgress();
         startBtn.textContent = "Start Session";
+        preEdgeTimerEndTime = null;
+        edgeDelaySec = 0;
       }
 
       function handleButton() {
@@ -272,6 +279,7 @@
       }
 
       function restartSession() {
+        startBtn.disabled = false;
         edgesLeft = Number(document.getElementById("totalEdges").value);
         currentState = null;
         setState("Idle");
@@ -282,10 +290,13 @@
 
         resetProgress();
         startBtn.textContent = "Start Session";
+        preEdgeTimerEndTime = null;
+        edgeDelaySec = 0;
       }
 
-      function nextState() {
+      async function nextState() {
         startBtn.disabled = false;
+
         if (edgesLeft <= 0) {
           document.getElementById("output").textContent = "Finished!";
           startBtn.textContent = "Restart Session";
@@ -296,8 +307,11 @@
         }
 
         if (currentState === "Resting" || currentState === null) {
+          // ── PRE-EDGE phase ──────────────────────────────────────────────
           currentState = "Pre-Edge";
           setState("Pre-Edge");
+          preEdgeTimerEndTime = null;
+          edgeDelaySec = 0;
 
           const duration = rand(
             document.getElementById("untilMin").value,
@@ -308,40 +322,71 @@
             "Edge! you only have " + duration + " min";
           startBtn.textContent = "Edge";
 
-          startProgress(duration * 60);
+          // Start the countdown; when it finishes naturally, record the end time
+          startProgress(duration * 60, () => {
+            preEdgeTimerEndTime = Date.now();
+          });
+
         } else if (currentState === "Pre-Edge") {
+          // ── EDGING phase ────────────────────────────────────────────────
           currentState = "Edging";
           setState("Edging");
 
-          const duration = rand(
+          // Calculate how many seconds passed since the pre-edge timer ended.
+          // If the user clicked before the timer finished, delay is 0.
+          if (preEdgeTimerEndTime !== null) {
+            edgeDelaySec = (Date.now() - preEdgeTimerEndTime) / 1000;
+          } else {
+            edgeDelaySec = 0;
+          }
+
+          edgesLeft--;
+          document.getElementById("count").textContent =
+            "Edges Left: " + edgesLeft;
+
+          const baseDuration = rand(
             document.getElementById("durMin").value,
             document.getElementById("durMax").value,
           );
 
-          edgesLeft--;
+          // Add the reaction delay to edging time so total stimulation is preserved
+          const edgingDuration = baseDuration * 60 + edgeDelaySec;
 
-          document.getElementById("count").textContent =
-            "Edges Left: " + edgesLeft;
           document.getElementById("output").textContent =
-            "Stay at the edge for " + duration + " min";
+            "Stay at the edge for " +
+            baseDuration +
+            " min" +
+            (edgeDelaySec > 0
+              ? " (+" + edgeDelaySec.toFixed(1) + "s punishment added)"
+              : "");
 
           startBtn.textContent = "Stay.";
           startBtn.disabled = true;
-          startProgress(duration * 60);
+          startProgress(edgingDuration);
+
         } else if (currentState === "Edging") {
+          // ── RESTING phase ───────────────────────────────────────────────
           currentState = "Resting";
           setState("Resting");
 
-          const duration = rand(
+          const baseDuration = rand(
             document.getElementById("restMin").value,
             document.getElementById("restMax").value,
           );
 
-          document.getElementById("output").textContent =
-            "Rest for " + duration + " sec";
-          startBtn.textContent = "Resting";
+          // Subtract the reaction delay from rest so total session time stays consistent
+          const restDuration = Math.max(0, baseDuration - edgeDelaySec);
 
-          startProgress(duration);
+          document.getElementById("output").textContent =
+            "Rest for " +
+            restDuration.toFixed(1) +
+            " sec" +
+            (edgeDelaySec > 0
+              ? " (-" + edgeDelaySec.toFixed(1) + "s punishment removed)"
+              : "");
+
+          startBtn.textContent = "Resting";
+          startProgress(restDuration);
         }
       }
 
@@ -352,7 +397,11 @@
         return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
       }
 
-      function startProgress(seconds) {
+      /**
+       * @param {number} seconds - total duration
+       * @param {Function} [onComplete] - optional callback fired when timer ends naturally
+       */
+      function startProgress(seconds, onComplete) {
         resetProgress();
 
         const progressBar = document.getElementById("progressBar");
@@ -365,11 +414,12 @@
 
           const percent = Math.min((elapsedMs / totalMs) * 100, 100);
           progressBar.style.width = percent + "%";
-
           progressText.textContent = formatTime(Math.max(0, remaining));
 
           if (elapsedMs >= totalMs) {
             clearInterval(timerInterval);
+
+            if (onComplete) onComplete();
 
             if (currentState !== "Pre-Edge") {
               nextState();
