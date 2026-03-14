@@ -153,6 +153,16 @@
         width: fit-content;
       }
 
+      .helpBtn {
+        position: fixed;
+        bottom: var(--spacing-sm);
+        right: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-xs);
+        z-index: 10;
+        width: fit-content;
+      }
+
       .edgeFailedBtn {
         position: fixed;
         bottom: var(--spacing-sm);
@@ -307,6 +317,122 @@
       }
 
       /* ─────────────────────────────────────────────
+         HELP OVERLAY
+         ───────────────────────────────────────────── */
+      #helpOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.92);
+        z-index: 100;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      #helpBox {
+        width: 100%;
+        max-width: 480px;
+        background: #0f0000;
+        border: var(--border-width-thin) solid #440000;
+        border-radius: var(--radius-md);
+        padding: 24px 20px 20px;
+        margin: auto;
+      }
+
+      #helpBox h1 {
+        font-size: 22px;
+        color: var(--color-accent);
+        margin: 0 0 4px;
+        letter-spacing: 0.04em;
+      }
+
+      #helpBox .help-subtitle {
+        font-size: 12px;
+        color: #663333;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 20px;
+      }
+
+      #helpBox h2 {
+        font-size: 13px;
+        color: #993333;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 18px 0 8px;
+        padding-bottom: 4px;
+        border-bottom: var(--border-width-thin) solid #2a0000;
+      }
+
+      #helpBox p,
+      #helpBox li {
+        font-size: 13px;
+        color: #cc5555;
+        line-height: 1.6;
+        margin: 0 0 6px;
+      }
+
+      #helpBox ul {
+        margin: 0 0 6px;
+        padding-left: 18px;
+      }
+
+      #helpBox .penalty-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+
+      #helpBox .penalty-table th {
+        text-align: left;
+        color: #663333;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 4px 6px;
+        border-bottom: var(--border-width-thin) solid #2a0000;
+      }
+
+      #helpBox .penalty-table td {
+        color: #cc5555;
+        padding: 5px 6px;
+        border-bottom: var(--border-width-thin) solid #1a0000;
+        vertical-align: top;
+      }
+
+      #helpBox .penalty-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      #helpBox .penalty-table td:first-child {
+        color: var(--color-fail-text);
+        font-weight: bold;
+        white-space: nowrap;
+      }
+
+      #helpBox .close-btn {
+        display: block;
+        width: 100%;
+        margin-top: 20px;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        background: var(--color-surface);
+        color: var(--color-accent-muted);
+        border: var(--border-width) solid var(--color-border);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        letter-spacing: 0.05em;
+      }
+
+      #helpBox .close-btn:active {
+        background: var(--color-surface-hover);
+      }
+
+      /* ─────────────────────────────────────────────
          RESPONSIVE
          ───────────────────────────────────────────── */
       @media (max-width: 600px) {
@@ -330,11 +456,82 @@
   </head>
 
   <body>
+    <!-- ── HELP OVERLAY — shown on first load ───────────────────────── -->
+    <div id="helpOverlay">
+      <div id="helpBox">
+        <h1>Edge Timer</h1>
+        <div class="help-subtitle">How to play</div>
+
+        <h2>Overview</h2>
+        <p>Edge Timer guides you through a session of repeated edging cycles. Each cycle has three phases: build-up, edging, and rest. Complete all edges to finish the session.</p>
+
+        <h2>Session Phases</h2>
+        <ul>
+          <li><strong>Pre-Edge</strong> — A countdown runs. Build up stimulation and press <em>Edge</em> when you reach the edge. Pressing early is fine; a late press adds bonus time to your next edge.</li>
+          <li><strong>Edging</strong> — Hold at the edge for the full duration. The button is locked — you must stay until the timer ends.</li>
+          <li><strong>Resting</strong> — Cool down for the displayed duration. The next cycle starts automatically when rest ends.</li>
+        </ul>
+
+        <h2>Edge Failed</h2>
+        <p>If you go over the edge during the <strong>Edging</strong> phase, press <strong>⚠ Edge Failed</strong> at the bottom of the screen. Penalties are applied based on how much time was left on the timer:</p>
+
+        <table class="penalty-table">
+          <thead>
+            <tr>
+              <th>Time Remaining</th>
+              <th>Penalties Applied</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>&lt; 30s</td>
+              <td>+5% rest skip chance</td>
+            </tr>
+            <tr>
+              <td>30s – 1 min</td>
+              <td>+5% skip chance, edge max +1 min</td>
+            </tr>
+            <tr>
+              <td>1 – 2 min</td>
+              <td>+10% skip chance, edge +1/+2 min, rest ×0.90</td>
+            </tr>
+            <tr>
+              <td>2 – 3 min</td>
+              <td>+20% skip chance, edge +1/+2 min, rest ×0.80</td>
+            </tr>
+            <tr>
+              <td>3 – 4 min</td>
+              <td>+20% skip chance, edge +2/+2 min, rest ×0.70</td>
+            </tr>
+            <tr>
+              <td>4+ min</td>
+              <td>+40% skip chance, edge +3/+3 min, rest ×0.10, <strong>+1 extra edge</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Status Panel</h2>
+        <p>Once a session starts, a panel below the progress bar shows all live parameters — edge ranges, rest ranges, skip chance, and the next rest modifier. Penalty rows dim when inactive and light up in orange when a penalty is pending.</p>
+
+        <h2>Config</h2>
+        <p>Tap <strong>Config</strong> (top-left) before starting to adjust all ranges manually, or use <strong>Randomize Parameters</strong> to generate a random session. Config is locked while a session is running.</p>
+
+        <h2>Controls</h2>
+        <ul>
+          <li><strong>Pause / Resume</strong> — freezes the current timer.</li>
+          <li><strong>Restart</strong> — ends the session and resets all penalties.</li>
+        </ul>
+
+        <button class="close-btn" onclick="closeHelp()">Got it — Start Playing</button>
+      </div>
+    </div>
+    <!-- ─────────────────────────────────────────────────────────────── -->
     <button class="configToggle" onclick="toggleConfig()">Config</button>
     <button id="pauseBtn" class="pauseBtn" onclick="togglePause()" disabled>
       Pause
     </button>
     <button class="restartBtn" onclick="restartSession()">Restart</button>
+    <button id="helpBtn" class="helpBtn" onclick="openHelp()">?</button>
     <button id="edgeFailedBtn" class="edgeFailedBtn" onclick="edgeFailed()">
       ⚠ Edge Failed
     </button>
@@ -884,6 +1081,17 @@
         clearInterval(timerInterval);
         document.getElementById("progressBar").style.width = "0%";
         progressText.textContent = "00:00";
+      }
+
+      // ─────────────────────────────────────────────────────────────────────
+      // HELP OVERLAY
+      // ─────────────────────────────────────────────────────────────────────
+      function closeHelp() {
+        document.getElementById("helpOverlay").style.display = "none";
+      }
+
+      function openHelp() {
+        document.getElementById("helpOverlay").style.display = "flex";
       }
 
       // ─────────────────────────────────────────────────────────────────────
