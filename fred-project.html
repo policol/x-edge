@@ -10,7 +10,7 @@
          ───────────────────────────────────────────── */
       :root {
         /* Colors */
-        --color-bg: #07000b;
+        --color-bg: #0b0b0b;
         --color-text: #ff3b3b;
         --color-accent: #ff0000;
         --color-accent-muted: #ff4d4d;
@@ -50,6 +50,12 @@
         --radius-md: 10px;
         --radius-lg: 12px;
 
+        /* Edge Failed button */
+        --color-fail-surface: #1a0a00;
+        --color-fail-text: #ff8c00;
+        --color-fail-border: #ff6600;
+        --color-fail-hover: #331500;
+
         /* Border width */
         --border-width: 2px;
         --border-width-thin: 1px;
@@ -81,17 +87,6 @@
         background: var(--color-bg);
         color: var(--color-text);
         padding: 20px;
-      }
-
-      #config input ::-webkit-outer-spin-button,
-      #config input ::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-
-      /* Firefox */
-      #config input {
-        appearance: textfield;
       }
 
       /* ─────────────────────────────────────────────
@@ -158,6 +153,28 @@
         width: fit-content;
       }
 
+      .edgeFailedBtn {
+        position: fixed;
+        bottom: var(--spacing-sm);
+        left: 50%;
+        transform: translateX(-50%);
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-xs);
+        z-index: 10;
+        width: fit-content;
+        display: none; /* hidden by default; shown only during Edging */
+        background: var(--color-fail-surface);
+        color: var(--color-fail-text);
+        border: var(--border-width) solid var(--color-fail-border);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .edgeFailedBtn:active {
+        background: var(--color-fail-hover);
+      }
+
       /* ─────────────────────────────────────────────
          LAYOUT
          ───────────────────────────────────────────── */
@@ -174,15 +191,13 @@
         display: none;
         margin-top: var(--spacing-lg);
         width: 100%;
-        max-width: var(--container-max-width);
-        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
         gap: var(--spacing-sm);
         align-items: center;
       }
 
       #config label {
         font-size: var(--font-size-xs);
-        text-align: right;
       }
 
       #config input {
@@ -251,9 +266,50 @@
       }
 
       /* ─────────────────────────────────────────────
+         STATUS PANEL
+         ───────────────────────────────────────────── */
+      #statusPanel {
+        margin-top: var(--spacing-lg);
+        width: 100%;
+        border: var(--border-width-thin) solid #330000;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+      }
+
+      .status-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 12px;
+        border-bottom: var(--border-width-thin) solid #1f0000;
+        font-size: var(--font-size-xs);
+      }
+
+      .status-row:last-child {
+        border-bottom: none;
+      }
+
+      .status-label {
+        color: #883333;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 11px;
+      }
+
+      .status-value {
+        color: var(--color-accent-muted);
+        font-weight: bold;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .status-penalty {
+        color: var(--color-fail-text);
+      }
+
+      /* ─────────────────────────────────────────────
          RESPONSIVE
          ───────────────────────────────────────────── */
-      /* @media (max-width: 600px) {
+      @media (max-width: 600px) {
         #config {
           grid-template-columns: 1fr 1fr;
         }
@@ -269,7 +325,7 @@
         #config button {
           grid-column: span 1;
         }
-      } */
+      }
     </style>
   </head>
 
@@ -279,40 +335,11 @@
       Pause
     </button>
     <button class="restartBtn" onclick="restartSession()">Restart</button>
+    <button id="edgeFailedBtn" class="edgeFailedBtn" onclick="edgeFailed()">
+      ⚠ Edge Failed
+    </button>
 
-    <div id="config">
-      <label>Edge Until</label>
-      <label>Min</label>
-      <input id="untilMin" type="number" value="2" />
-
-      <label>Max</label>
-      <input id="untilMax" type="number" value="6" />
-
-      <label>Edge Duration</label>
-      <label>Min</label>
-
-      <input id="durMin" type="number" value="2" />
-
-      <label>Max</label>
-      <input id="durMax" type="number" value="8" />
-
-      <label>Rest Duration</label>
-      <label>Min</label>
-
-      <input id="restMin" type="number" value="30" />
-
-      <label>Max</label>
-      <input id="restMax" type="number" value="90" />
-
-      <label>Total Edges</label>
-      <input id="totalEdges" type="number" value="5" />
-
-      <button style="grid-column: span 5" onclick="randomizeAll()">
-        Randomize Parameters
-      </button>
-    </div>
-
-    <div class="container" id="main">
+    <div class="container">
       <div id="state">Idle</div>
 
       <button id="startButton" onclick="handleButton()">Start Session</button>
@@ -325,46 +352,93 @@
         <div id="progressBar"></div>
         <div id="progressText">00:00</div>
       </div>
+
+      <div id="statusPanel" style="display: none">
+        <div class="status-row">
+          <span class="status-label">Edge Until</span>
+          <span class="status-value" id="st-until">—</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Edge Duration</span>
+          <span class="status-value" id="st-dur">—</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Rest Duration</span>
+          <span class="status-value" id="st-rest">—</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Edges Left</span>
+          <span class="status-value" id="st-edges">—</span>
+        </div>
+        <div class="status-row" id="st-skip-row">
+          <span class="status-label">Rest Skip Chance</span>
+          <span class="status-value status-penalty" id="st-skip">0%</span>
+        </div>
+        <div class="status-row" id="st-mod-row">
+          <span class="status-label">Next Rest Modifier</span>
+          <span class="status-value status-penalty" id="st-mod">×1.00</span>
+        </div>
+      </div>
+
+      <div id="config">
+        <label>Edge Until Min</label>
+        <input id="untilMin" type="number" value="2" />
+
+        <label>Max</label>
+        <input id="untilMax" type="number" value="6" />
+
+        <label>Edge Duration Min</label>
+        <input id="durMin" type="number" value="2" />
+
+        <label>Max</label>
+        <input id="durMax" type="number" value="8" />
+
+        <label>Rest Duration Min</label>
+        <input id="restMin" type="number" value="30" />
+
+        <label>Max</label>
+        <input id="restMax" type="number" value="90" />
+
+        <label>Total Edges</label>
+        <input id="totalEdges" type="number" value="5" />
+
+        <button style="grid-column: span 4" onclick="randomizeAll()">
+          Randomize Parameters
+        </button>
+      </div>
     </div>
 
     <script>
       // ─────────────────────────────────────────────────────────────────────
       // RANDOMIZATION BOUNDS
-      // These define the min/max ranges used when "Randomize Parameters" is
-      // clicked. Adjust these to change the pool of possible random values.
       // ─────────────────────────────────────────────────────────────────────
+      const RAND_UNTIL_MIN_LO     = 3;
+      const RAND_UNTIL_MIN_HI     = 8;
+      const RAND_UNTIL_MAX_PAD_LO = 2;
+      const RAND_UNTIL_MAX_PAD_HI = 10;
 
-      // "Edge Until" — how many minutes to build up before edging (minutes)
-      const RAND_UNTIL_MIN_LO = 1; // lowest possible untilMin
-      const RAND_UNTIL_MIN_HI = 2; // highest possible untilMin
-      const RAND_UNTIL_MAX_PAD_LO = 2; // untilMax is at least untilMin + this
-      const RAND_UNTIL_MAX_PAD_HI = 5; // untilMax is at most untilMin + this
-
-      // "Edge Duration" — how long to hold the edge (minutes)
-      const RAND_DUR_MIN_LO = 1;
-      const RAND_DUR_MIN_HI = 3;
+      const RAND_DUR_MIN_LO     = 1;
+      const RAND_DUR_MIN_HI     = 3;
       const RAND_DUR_MAX_PAD_LO = 1;
-      const RAND_DUR_MAX_PAD_HI = 10;
+      const RAND_DUR_MAX_PAD_HI = 5;
 
-      // "Rest Duration" — cool-down between edges (seconds)
-      const RAND_REST_MIN_LO = 10;
-      const RAND_REST_MIN_HI = 25;
+      const RAND_REST_MIN_LO     = 10;
+      const RAND_REST_MIN_HI     = 25;
       const RAND_REST_MAX_PAD_LO = 10;
       const RAND_REST_MAX_PAD_HI = 40;
 
-      // Total number of edges in a randomized session
       const RAND_EDGES_LO = 5;
       const RAND_EDGES_HI = 12;
 
       // ─────────────────────────────────────────────────────────────────────
-      // DEFAULT INPUT VALUES (mirrors the HTML value="" attributes)
+      // DEFAULT INPUT VALUES
       // ─────────────────────────────────────────────────────────────────────
-      const DEFAULT_UNTIL_MIN = 1;
-      const DEFAULT_UNTIL_MAX = 5;
-      const DEFAULT_DUR_MIN = 2;
-      const DEFAULT_DUR_MAX = 8;
-      const DEFAULT_REST_MIN = 30;
-      const DEFAULT_REST_MAX = 90;
+      const DEFAULT_UNTIL_MIN   = 2;
+      const DEFAULT_UNTIL_MAX   = 6;
+      const DEFAULT_DUR_MIN     = 2;
+      const DEFAULT_DUR_MAX     = 8;
+      const DEFAULT_REST_MIN    = 30;
+      const DEFAULT_REST_MAX    = 90;
       const DEFAULT_TOTAL_EDGES = 5;
 
       // ─────────────────────────────────────────────────────────────────────
@@ -377,13 +451,49 @@
       let preEdgeTimerEndTime = null;
       let edgeDelaySec = 0;
 
-      const startBtn = document.getElementById("startButton");
-      const stateLabel = document.getElementById("state");
-      const progressText = document.getElementById("progressText");
-      const configBtn = document.querySelector(".configToggle");
-      const configPanel = document.getElementById("config");
-      const pauseBtn = document.getElementById("pauseBtn");
-      const mainContainer = document.getElementById("main");
+      // ── Penalty system ───────────────────────────────────────────────────
+      let restSkipChance  = 0;   // % chance the next rest phase is skipped
+      let nextRestModifier = 1;  // multiplier applied to the next rest duration
+      let edgeEndTime     = null; // Date.now() timestamp of when edging ends
+      // ─────────────────────────────────────────────────────────────────────
+
+      const startBtn      = document.getElementById("startButton");
+      const stateLabel    = document.getElementById("state");
+      const progressText  = document.getElementById("progressText");
+      const configBtn     = document.querySelector(".configToggle");
+      const configPanel   = document.getElementById("config");
+      const pauseBtn      = document.getElementById("pauseBtn");
+      const edgeFailedBtn = document.getElementById("edgeFailedBtn");
+      const statusPanel   = document.getElementById("statusPanel");
+
+      // ─────────────────────────────────────────────────────────────────────
+      // STATUS PANEL
+      // ─────────────────────────────────────────────────────────────────────
+      function updateStatusPanel() {
+        const untilMin = document.getElementById("untilMin").value;
+        const untilMax = document.getElementById("untilMax").value;
+        const durMin   = document.getElementById("durMin").value;
+        const durMax   = document.getElementById("durMax").value;
+        const restMin  = document.getElementById("restMin").value;
+        const restMax  = document.getElementById("restMax").value;
+
+        document.getElementById("st-until").textContent =
+          untilMin + "–" + untilMax + " min";
+        document.getElementById("st-dur").textContent =
+          durMin + "–" + durMax + " min";
+        document.getElementById("st-rest").textContent =
+          restMin + "–" + restMax + " sec";
+        document.getElementById("st-edges").textContent = edgesLeft;
+        document.getElementById("st-skip").textContent  = restSkipChance + "%";
+        document.getElementById("st-mod").textContent   =
+          "×" + nextRestModifier.toFixed(2);
+
+        // Dim penalty rows when they carry no active penalty
+        const skipRow = document.getElementById("st-skip-row");
+        const modRow  = document.getElementById("st-mod-row");
+        skipRow.style.opacity = restSkipChance > 0     ? "1" : "0.35";
+        modRow.style.opacity  = nextRestModifier !== 1  ? "1" : "0.35";
+      }
 
       let isPaused = false;
       let pausedRemainingSec = 0;
@@ -405,9 +515,6 @@
       function toggleConfig() {
         configPanel.style.display =
           configPanel.style.display === "grid" ? "none" : "grid";
-        if (configPanel.style.display === "grid")
-          mainContainer.style.display = "none";
-        else mainContainer.style.display = "block";
       }
 
       function randomizeAll() {
@@ -428,17 +535,16 @@
         );
         const totalEdgesRandom = rand(RAND_EDGES_LO, RAND_EDGES_HI);
 
-        document.getElementById("untilMin").value = untilMin;
-        document.getElementById("untilMax").value = untilMax;
-        document.getElementById("durMin").value = durMin;
-        document.getElementById("durMax").value = durMax;
-        document.getElementById("restMin").value = restMin;
-        document.getElementById("restMax").value = restMax;
+        document.getElementById("untilMin").value   = untilMin;
+        document.getElementById("untilMax").value   = untilMax;
+        document.getElementById("durMin").value     = durMin;
+        document.getElementById("durMax").value     = durMax;
+        document.getElementById("restMin").value    = restMin;
+        document.getElementById("restMax").value    = restMax;
         document.getElementById("totalEdges").value = totalEdgesRandom;
 
         edgesLeft = totalEdgesRandom;
-        document.getElementById("count").textContent =
-          "Edges Left: " + edgesLeft;
+        document.getElementById("count").textContent = "Edges Left: " + edgesLeft;
         currentState = null;
         setState("Idle");
         resetProgress();
@@ -460,6 +566,7 @@
           pauseBtn.classList.add("paused");
           startBtn.disabled = true;
           document.querySelector(".restartBtn").disabled = true;
+          edgeFailedBtn.style.display = "none";
           setState("Paused");
         } else {
           isPaused = false;
@@ -467,9 +574,105 @@
           pauseBtn.classList.remove("paused");
           startBtn.disabled = currentState === "Edging";
           document.querySelector(".restartBtn").disabled = false;
+          if (currentState === "Edging") edgeFailedBtn.style.display = "block";
           setState(currentState);
           startProgress(pausedRemainingSec, pausedOnComplete);
         }
+      }
+
+      // ─────────────────────────────────────────────────────────────────────
+      // EDGE FAILED — PENALTY SYSTEM
+      // ─────────────────────────────────────────────────────────────────────
+      function edgeFailed() {
+        if (currentState !== "Edging" || edgeEndTime === null) return;
+
+        const remainingSeconds = Math.max(0, (edgeEndTime - Date.now()) / 1000);
+        const remainingMinutes = remainingSeconds / 60;
+
+        const durMinEl = document.getElementById("durMin");
+        const durMaxEl = document.getElementById("durMax");
+
+        // Track whether this failure triggers the +1 edge penalty (tier 6)
+        let extraEdge = false;
+
+        // Apply penalty tier based on remaining time
+        if (remainingSeconds < 30) {
+          // Tier 1: < 30 seconds
+          restSkipChance += 5;
+
+        } else if (remainingSeconds < 60) {
+          // Tier 2: 30s – < 1 min
+          restSkipChance += 5;
+          durMaxEl.value = Number(durMaxEl.value) + 1;
+
+        } else if (remainingMinutes < 2) {
+          // Tier 3: 1 min – < 2 min
+          restSkipChance += 10;
+          durMinEl.value = Number(durMinEl.value) + 1;
+          durMaxEl.value = Number(durMaxEl.value) + 2;
+          nextRestModifier *= 0.9;
+
+        } else if (remainingMinutes < 3) {
+          // Tier 4: 2 min – < 3 min
+          restSkipChance += 20;
+          durMinEl.value = Number(durMinEl.value) + 1;
+          durMaxEl.value = Number(durMaxEl.value) + 2;
+          nextRestModifier *= 0.8;
+
+        } else if (remainingMinutes < 4) {
+          // Tier 5: 3 min – < 4 min
+          restSkipChance += 20;
+          durMinEl.value = Number(durMinEl.value) + 2;
+          durMaxEl.value = Number(durMaxEl.value) + 2;
+          nextRestModifier *= 0.7;
+
+        } else {
+          // Tier 6: 4+ min — maximum penalty + extra edge added
+          restSkipChance += 40;
+          durMinEl.value = Number(durMinEl.value) + 3;
+          durMaxEl.value = Number(durMaxEl.value) + 3;
+          nextRestModifier *= 0.1;
+          edgesLeft += 1;
+          extraEdge = true;
+        }
+
+        // Cap restSkipChance at 100%
+        restSkipChance = Math.min(100, restSkipChance);
+
+        // Sync the main edges counter (may have changed via extraEdge)
+        document.getElementById("count").textContent = "Edges Left: " + edgesLeft;
+
+        // Build tier label for the output message
+        const tierLabel =
+          remainingSeconds < 30  ? "< 30s"    :
+          remainingSeconds < 60  ? "30s–1min" :
+          remainingMinutes < 2   ? "1–2 min"  :
+          remainingMinutes < 3   ? "2–3 min"  :
+          remainingMinutes < 4   ? "3–4 min"  :
+                                   "4+ min";
+
+        // Build the full penalty summary line
+        let penaltyMsg =
+          "Edge failed! (" + tierLabel + " left)" +
+          " — skip chance: " + restSkipChance + "%" +
+          " | next rest ×" + nextRestModifier.toFixed(2);
+
+        if (extraEdge) {
+          penaltyMsg += " | +1 edge added!";
+        }
+
+        document.getElementById("output").textContent = penaltyMsg;
+
+        updateStatusPanel();
+
+        // Transition to Resting — set currentState to "Edging" so
+        // nextState() enters the Resting branch
+        currentState = "Edging";
+        edgeFailedBtn.style.display = "none";
+        edgeEndTime = null;
+        clearInterval(timerInterval);
+        // Brief delay so the penalty message is readable before it's overwritten
+        setTimeout(() => nextState(), 1200);
       }
 
       // ─────────────────────────────────────────────────────────────────────
@@ -487,7 +690,6 @@
         startBtn.disabled = false;
         configBtn.disabled = false;
         configPanel.style.display = "none";
-        mainContainer.style.display = "block"
         pauseBtn.disabled = true;
         pauseBtn.textContent = "Pause";
         pauseBtn.classList.remove("paused");
@@ -498,14 +700,20 @@
         currentState = null;
         setState("Idle");
 
-        document.getElementById("count").textContent =
-          "Edges Left: " + edgesLeft;
+        document.getElementById("count").textContent = "Edges Left: " + edgesLeft;
         document.getElementById("output").textContent = "";
 
         resetProgress();
         startBtn.textContent = "Start Session";
         preEdgeTimerEndTime = null;
         edgeDelaySec = 0;
+
+        // Reset penalty state
+        restSkipChance   = 0;
+        nextRestModifier = 1;
+        edgeEndTime      = null;
+        edgeFailedBtn.style.display = "none";
+        statusPanel.style.display   = "none";
       }
 
       async function nextState() {
@@ -517,6 +725,7 @@
           currentState = "Finished";
           setState("Finished");
           resetProgress();
+          edgeFailedBtn.style.display = "none";
           pauseBtn.disabled = true;
           pauseBtn.textContent = "Pause";
           pauseBtn.classList.remove("paused");
@@ -529,6 +738,7 @@
             configBtn.disabled = true;
             configPanel.style.display = "none";
             pauseBtn.disabled = false;
+            statusPanel.style.display = "block";
           }
           currentState = "Pre-Edge";
           setState("Pre-Edge");
@@ -544,9 +754,11 @@
             "Edge! you only have " + duration + " min";
           startBtn.textContent = "Edge";
 
+          updateStatusPanel();
           startProgress(duration * 60, () => {
             preEdgeTimerEndTime = Date.now();
           });
+
         } else if (currentState === "Pre-Edge") {
           // ── EDGING ────────────────────────────────────────────────────────
           currentState = "Edging";
@@ -567,6 +779,9 @@
           );
           const edgingDuration = baseDuration * 60 + edgeDelaySec;
 
+          // Record when this edge is expected to end (for penalty calculation)
+          edgeEndTime = Date.now() + edgingDuration * 1000;
+
           document.getElementById("output").textContent =
             "Stay at the edge for " +
             baseDuration +
@@ -577,27 +792,56 @@
 
           startBtn.textContent = "Stay.";
           startBtn.disabled = true;
+          edgeFailedBtn.style.display = "block";
+          updateStatusPanel();
           startProgress(edgingDuration);
+
         } else if (currentState === "Edging") {
           // ── RESTING ───────────────────────────────────────────────────────
+          edgeFailedBtn.style.display = "none";
+          edgeEndTime = null;
+
           currentState = "Resting";
           setState("Resting");
+          startBtn.disabled = true;
 
-          const baseDuration = rand(
+          // Rest skip chance — roll before doing anything else
+          if (restSkipChance > 0 && rand(0, 100) < restSkipChance) {
+            document.getElementById("output").textContent =
+              "Rest skipped! (" + restSkipChance + "% chance) Penalty carries on…";
+            nextRestModifier = 1; // modifier consumed (skip = worst rest possible)
+            startBtn.textContent = "Next Edge";
+            updateStatusPanel();
+            // 2-second readable pause, then auto-advance to Pre-Edge
+            startProgress(2, () => {
+              currentState = "Resting";
+              startBtn.disabled = false;
+              nextState();
+            });
+            return;
+          }
+
+          const baseRestDuration = rand(
             document.getElementById("restMin").value,
             document.getElementById("restMax").value,
           );
-          const restDuration = Math.max(0, baseDuration - edgeDelaySec);
+          // Apply delay adjustment and nextRestModifier, then reset modifier
+          const adjustedRest    = Math.max(0, baseRestDuration - edgeDelaySec);
+          const appliedModifier = nextRestModifier;
+          const restDuration    = Math.max(0, adjustedRest * appliedModifier);
+          nextRestModifier = 1; // reset after applying
+
+          let restNote = "";
+          if (edgeDelaySec > 0)
+            restNote += " (-" + edgeDelaySec.toFixed(1) + "s delay removed)";
+          if (appliedModifier !== 1)
+            restNote += " (×" + appliedModifier.toFixed(2) + " penalty)";
 
           document.getElementById("output").textContent =
-            "Rest for " +
-            restDuration.toFixed(1) +
-            " sec" +
-            (edgeDelaySec > 0
-              ? " (-" + edgeDelaySec.toFixed(1) + "s delay removed)"
-              : "");
+            "Rest for " + restDuration.toFixed(1) + " sec" + restNote;
 
-          startBtn.textContent = "Resting";
+          startBtn.textContent = "Rest";
+          updateStatusPanel();
           startProgress(restDuration);
         }
       }
