@@ -51,7 +51,9 @@
         --transition-progress: width 0.1s linear;
       }
 
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
 
       body {
         margin: 0;
@@ -78,18 +80,30 @@
         border-radius: var(--radius-md);
         cursor: pointer;
       }
-      button:active { background: var(--color-surface-hover); }
-      button:disabled { filter: grayscale(80%) saturate(0.5) opacity(0.6); }
+      button:active {
+        background: var(--color-surface-hover);
+      }
+      button:disabled {
+        filter: grayscale(80%) saturate(0.5) opacity(0.6);
+      }
 
       .configToggle {
-        position: fixed; top: var(--spacing-sm); left: var(--spacing-sm);
+        position: fixed;
+        top: var(--spacing-sm);
+        left: var(--spacing-sm);
         padding: var(--spacing-sm) var(--spacing-md);
-        font-size: var(--font-size-xs); z-index: 10; width: fit-content;
+        font-size: var(--font-size-xs);
+        z-index: 10;
+        width: fit-content;
       }
       .pauseBtn {
-        position: fixed; top: 54px; left: var(--spacing-sm);
+        position: fixed;
+        top: 54px;
+        left: var(--spacing-sm);
         padding: var(--spacing-sm) var(--spacing-md);
-        font-size: var(--font-size-xs); z-index: 10; width: fit-content;
+        font-size: var(--font-size-xs);
+        z-index: 10;
+        width: fit-content;
       }
       .pauseBtn.paused {
         background: var(--color-pause-surface);
@@ -97,76 +111,114 @@
         border-color: var(--color-pause-border);
       }
       .restartBtn {
-        position: fixed; top: var(--spacing-sm); right: var(--spacing-sm);
+        position: fixed;
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
         padding: var(--spacing-sm) var(--spacing-md);
-        font-size: var(--font-size-xs); z-index: 10; width: fit-content;
+        font-size: var(--font-size-xs);
+        z-index: 10;
+        width: fit-content;
       }
       .helpBtn {
-        position: fixed; bottom: var(--spacing-sm); right: var(--spacing-sm);
+        position: fixed;
+        bottom: var(--spacing-sm);
+        right: var(--spacing-sm);
         padding: var(--spacing-sm) var(--spacing-md);
-        font-size: var(--font-size-xs); z-index: 10; width: fit-content;
+        font-size: var(--font-size-xs);
+        z-index: 10;
+        width: fit-content;
       }
       .edgeFailedBtn {
-        position: fixed; bottom: var(--spacing-sm); left: 50%;
+        position: fixed;
+        bottom: var(--spacing-sm);
+        left: 50%;
         transform: translateX(-50%);
         padding: var(--spacing-sm) var(--spacing-md);
-        font-size: var(--font-size-xs); z-index: 10; width: fit-content;
+        font-size: var(--font-size-xs);
+        z-index: 10;
+        width: fit-content;
         display: none;
         background: var(--color-fail-surface);
         color: var(--color-fail-text);
         border: var(--border-width) solid var(--color-fail-border);
         border-radius: var(--radius-md);
-        cursor: pointer; white-space: nowrap;
+        cursor: pointer;
+        white-space: nowrap;
       }
-      .edgeFailedBtn:active { background: var(--color-fail-hover); }
+      .edgeFailedBtn:active {
+        background: var(--color-fail-hover);
+      }
 
       .container {
-        text-align: center; width: 100%;
+        text-align: center;
+        width: 100%;
         max-width: var(--container-max-width);
       }
 
       #config {
-        display: none; margin-top: var(--spacing-lg); width: 100%;
+        display: none;
+        margin-top: var(--spacing-lg);
+        width: 100%;
         grid-template-columns: 1fr 1fr 1fr 1fr;
-        gap: var(--spacing-sm); align-items: center;
+        gap: var(--spacing-sm);
+        align-items: center;
       }
-      #config label { font-size: var(--font-size-xs); }
+      #config label {
+        font-size: var(--font-size-xs);
+      }
       #config input {
-        width: 100%; padding: 8px;
+        width: 100%;
+        padding: 8px;
         background: var(--color-surface-dark);
         color: var(--color-accent-muted);
         border: var(--border-width-thin) solid var(--color-border);
-        border-radius: var(--radius-sm); font-size: var(--font-size-xs);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-xs);
       }
 
       #state {
-        font-size: var(--font-size-xl); font-weight: bold;
-        margin-bottom: var(--spacing-sm); color: var(--color-accent);
+        font-size: var(--font-size-xl);
+        font-weight: bold;
+        margin-bottom: var(--spacing-sm);
+        color: var(--color-accent);
       }
-      #output { font-size: var(--font-size-md); margin-top: var(--spacing-sm); }
+      #output {
+        font-size: var(--font-size-md);
+        margin-top: var(--spacing-sm);
+      }
       #count {
-        font-size: var(--font-size-lg); margin-top: var(--spacing-sm);
-        font-weight: bold; color: var(--color-accent);
+        font-size: var(--font-size-lg);
+        margin-top: var(--spacing-sm);
+        font-weight: bold;
+        color: var(--color-accent);
       }
 
       #progressContainer {
-        width: 100%; height: var(--progress-height);
+        width: 100%;
+        height: var(--progress-height);
         background: var(--color-progress-track);
         border: var(--border-width-thin) solid var(--color-border);
-        border-radius: var(--radius-lg); margin-top: var(--spacing-lg);
-        overflow: hidden; position: relative;
+        border-radius: var(--radius-lg);
+        margin-top: var(--spacing-lg);
+        overflow: hidden;
+        position: relative;
       }
       #progressBar {
-        height: 100%; width: 0%;
+        height: 100%;
+        width: 0%;
         background: var(--color-progress-fill);
         border-radius: var(--radius-lg) 0 0 var(--radius-lg);
         transition: var(--transition-progress);
       }
       #progressText {
-        position: absolute; top: 50%; left: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
         transform: translate(-50%, -50%);
-        font-size: var(--progress-text-size); font-weight: bold;
-        color: var(--color-white); pointer-events: none;
+        font-size: var(--progress-text-size);
+        font-weight: bold;
+        color: var(--color-white);
+        pointer-events: none;
       }
 
       /* ── Punishment banner ── */
@@ -187,8 +239,14 @@
         animation: flashIn 0.25s ease;
       }
       @keyframes flashIn {
-        from { opacity: 0; transform: scaleY(0.75); }
-        to   { opacity: 1; transform: scaleY(1); }
+        from {
+          opacity: 0;
+          transform: scaleY(0.75);
+        }
+        to {
+          opacity: 1;
+          transform: scaleY(1);
+        }
       }
 
       /* ── Orgasm result panel ── */
@@ -224,59 +282,140 @@
 
       /* ── Status panel ── */
       #statusPanel {
-        margin-top: var(--spacing-lg); width: 100%;
+        margin-top: var(--spacing-lg);
+        width: 100%;
         border: var(--border-width-thin) solid #330000;
-        border-radius: var(--radius-md); overflow: hidden;
+        border-radius: var(--radius-md);
+        overflow: hidden;
       }
       .status-row {
-        display: flex; justify-content: space-between; align-items: center;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         padding: 6px 12px;
         border-bottom: var(--border-width-thin) solid #1f0000;
         font-size: var(--font-size-xs);
       }
-      .status-row:last-child { border-bottom: none; }
+      .status-row:last-child {
+        border-bottom: none;
+      }
       .status-label {
-        color: #883333; text-transform: uppercase;
-        letter-spacing: 0.05em; font-size: 11px;
+        color: #883333;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 11px;
       }
       .status-value {
-        color: var(--color-accent-muted); font-weight: bold;
+        color: var(--color-accent-muted);
+        font-weight: bold;
         font-variant-numeric: tabular-nums;
       }
-      .status-penalty { color: var(--color-fail-text); }
+      .status-penalty {
+        color: var(--color-fail-text);
+      }
 
       /* ── Help overlay ── */
       #helpOverlay {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.92);
-        z-index: 100; display: flex; justify-content: center;
-        align-items: flex-start; padding: 20px; overflow-y: auto;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.92);
+        z-index: 100;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px;
+        overflow-y: auto;
       }
       #helpBox {
-        width: 100%; max-width: 480px; background: #0f0000;
+        width: 100%;
+        max-width: 480px;
+        background: #0f0000;
         border: var(--border-width-thin) solid #440000;
-        border-radius: var(--radius-md); padding: 24px 20px 20px; margin: auto;
+        border-radius: var(--radius-md);
+        padding: 24px 20px 20px;
+        margin: auto;
       }
-      #helpBox h1 { font-size: 22px; color: var(--color-accent); margin: 0 0 4px; letter-spacing: 0.04em; }
-      #helpBox .help-subtitle { font-size: 12px; color: #663333; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; }
-      #helpBox h2 { font-size: 13px; color: #993333; text-transform: uppercase; letter-spacing: 0.08em; margin: 18px 0 8px; padding-bottom: 4px; border-bottom: var(--border-width-thin) solid #2a0000; }
-      #helpBox p, #helpBox li { font-size: 13px; color: #cc5555; line-height: 1.6; margin: 0 0 6px; }
-      #helpBox ul { margin: 0 0 6px; padding-left: 18px; }
-      #helpBox .penalty-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 6px; }
-      #helpBox .penalty-table th { text-align: left; color: #663333; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 6px; border-bottom: var(--border-width-thin) solid #2a0000; }
-      #helpBox .penalty-table td { color: #cc5555; padding: 5px 6px; border-bottom: var(--border-width-thin) solid #1a0000; vertical-align: top; }
-      #helpBox .penalty-table tr:last-child td { border-bottom: none; }
-      #helpBox .penalty-table td:first-child { color: var(--color-fail-text); font-weight: bold; white-space: nowrap; }
-      #helpBox .close-btn { display: block; width: 100%; margin-top: 20px; padding: 12px; font-size: 16px; font-weight: bold; background: var(--color-surface); color: var(--color-accent-muted); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-md); cursor: pointer; letter-spacing: 0.05em; }
-      #helpBox .close-btn:active { background: var(--color-surface-hover); }
+      #helpBox h1 {
+        font-size: 22px;
+        color: var(--color-accent);
+        margin: 0 0 4px;
+        letter-spacing: 0.04em;
+      }
+      #helpBox .help-subtitle {
+        font-size: 12px;
+        color: #663333;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 20px;
+      }
+      #helpBox h2 {
+        font-size: 13px;
+        color: #993333;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 18px 0 8px;
+        padding-bottom: 4px;
+        border-bottom: var(--border-width-thin) solid #2a0000;
+      }
+      #helpBox p,
+      #helpBox li {
+        font-size: 13px;
+        color: #cc5555;
+        line-height: 1.6;
+        margin: 0 0 6px;
+      }
+      #helpBox ul {
+        margin: 0 0 6px;
+        padding-left: 18px;
+      }
+      #helpBox .penalty-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+      #helpBox .penalty-table th {
+        text-align: left;
+        color: #663333;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 4px 6px;
+        border-bottom: var(--border-width-thin) solid #2a0000;
+      }
+      #helpBox .penalty-table td {
+        color: #cc5555;
+        padding: 5px 6px;
+        border-bottom: var(--border-width-thin) solid #1a0000;
+        vertical-align: top;
+      }
+      #helpBox .penalty-table tr:last-child td {
+        border-bottom: none;
+      }
+      #helpBox .penalty-table td:first-child {
+        color: var(--color-fail-text);
+        font-weight: bold;
+        white-space: nowrap;
+      }
+      #helpBox .close-btn {
+        display: block;
+        width: 100%;
+        margin-top: 20px;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        background: var(--color-surface);
+        color: var(--color-accent-muted);
+        border: var(--border-width) solid var(--color-border);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        letter-spacing: 0.05em;
+      }
+      #helpBox .close-btn:active {
+        background: var(--color-surface-hover);
+      }
 
-      @media (max-width: 600px) {
-        #config { grid-template-columns: 1fr 1fr; }
-        #config button { grid-column: span 2; }
-      }
-      @media (max-width: 380px) {
-        #config { grid-template-columns: 1fr; }
-        #config button { grid-column: span 1; }
-      }
+      
     </style>
   </head>
 
@@ -287,53 +426,117 @@
         <div class="help-subtitle">How to play</div>
 
         <h2>Overview</h2>
-        <p>Edge Timer guides you through a session of repeated edging cycles. Each cycle has three phases: build-up, edging, and rest. Complete all edges to finish the session.</p>
+        <p>
+          Edge Timer guides you through a session of repeated edging cycles.
+          Each cycle has three phases: build-up, edging, and rest. Complete all
+          edges to finish the session.
+        </p>
 
         <h2>Session Phases</h2>
         <ul>
-          <li><strong>Pre-Edge</strong> — A countdown runs. Build up stimulation and press <em>Edge</em> when you reach the edge. Pressing early is fine; a late press adds bonus time to your next edge.</li>
-          <li><strong>Edging</strong> — Hold at the edge for the full duration. The button is locked — you must stay until the timer ends.</li>
-          <li><strong>Resting</strong> — Cool down for the displayed duration. The next cycle starts automatically when rest ends.</li>
+          <li>
+            <strong>Pre-Edge</strong> — A countdown runs. Build up stimulation
+            and press <em>Edge</em> when you reach the edge. Pressing early is
+            fine; a late press adds bonus time to your next edge.
+          </li>
+          <li>
+            <strong>Edging</strong> — Hold at the edge for the full duration.
+            The button is locked — you must stay until the timer ends.
+          </li>
+          <li>
+            <strong>Resting</strong> — Cool down for the displayed duration. The
+            next cycle starts automatically when rest ends.
+          </li>
         </ul>
 
         <h2>Edge Failed</h2>
-        <p>If you go over the edge during the <strong>Edging</strong> phase, press <strong>⚠ Edge Failed</strong>. Penalties are applied based on how much time was left:</p>
+        <p>
+          If you go over the edge during the <strong>Edging</strong> phase,
+          press <strong>⚠ Edge Failed</strong>. Penalties are applied based on
+          how much time was left:
+        </p>
 
         <table class="penalty-table">
-          <thead><tr><th>Time Remaining</th><th>Penalties Applied</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Time Remaining</th>
+              <th>Penalties Applied</th>
+            </tr>
+          </thead>
           <tbody>
-            <tr><td>&lt; 30s</td><td>+5% rest skip chance</td></tr>
-            <tr><td>30s – 1 min</td><td>+5% skip chance, edge max +1 min</td></tr>
-            <tr><td>1 – 2 min</td><td>+10% skip chance, edge +1/+2 min, rest ×0.90</td></tr>
-            <tr><td>2 – 3 min</td><td>+20% skip chance, edge +1/+2 min, rest ×0.80</td></tr>
-            <tr><td>3 – 4 min</td><td>+20% skip chance, edge +2/+2 min, rest ×0.70</td></tr>
-            <tr><td>4+ min</td><td>+40% skip chance, edge +3/+3 min, rest ×0.10, +1 extra edge</td></tr>
+            <tr>
+              <td>&lt; 30s</td>
+              <td>+5% rest skip chance</td>
+            </tr>
+            <tr>
+              <td>30s – 1 min</td>
+              <td>+5% skip chance, edge max +1 min</td>
+            </tr>
+            <tr>
+              <td>1 – 2 min</td>
+              <td>+10% skip chance, edge +1/+2 min, rest ×0.90</td>
+            </tr>
+            <tr>
+              <td>2 – 3 min</td>
+              <td>+20% skip chance, edge +1/+2 min, rest ×0.80</td>
+            </tr>
+            <tr>
+              <td>3 – 4 min</td>
+              <td>+20% skip chance, edge +2/+2 min, rest ×0.70</td>
+            </tr>
+            <tr>
+              <td>4+ min</td>
+              <td>
+                +40% skip chance, edge +3/+3 min, rest ×0.10, +1 extra edge
+              </td>
+            </tr>
           </tbody>
         </table>
 
-        <p><strong>Last edge punishment:</strong> Failing on the very last edge adds <strong>+2 extra punishment edges</strong> on top of all other penalties. You don't get to stop that easily.</p>
+        <p>
+          <strong>Last edge punishment:</strong> Failing on the very last edge
+          adds <strong>+2 extra punishment edges</strong> on top of all other
+          penalties. You don't get to stop that easily.
+        </p>
 
         <h2>Status Panel</h2>
-        <p>Once a session starts, a panel below the progress bar shows all live parameters. Penalty rows dim when inactive and light up in orange when active.</p>
+        <p>
+          Once a session starts, a panel below the progress bar shows all live
+          parameters. Penalty rows dim when inactive and light up in orange when
+          active.
+        </p>
 
         <h2>Config</h2>
-        <p>Tap <strong>Config</strong> (top-left) before starting to adjust ranges, or use <strong>Randomize Parameters</strong>. Config is locked during a session.</p>
+        <p>
+          Tap <strong>Config</strong> (top-left) before starting to adjust
+          ranges, or use <strong>Randomize Parameters</strong>. Config is locked
+          during a session.
+        </p>
 
         <h2>Controls</h2>
         <ul>
           <li><strong>Pause / Resume</strong> — freezes the current timer.</li>
-          <li><strong>Restart</strong> — ends the session and resets all penalties.</li>
+          <li>
+            <strong>Restart</strong> — ends the session and resets all
+            penalties.
+          </li>
         </ul>
 
-        <button class="close-btn" onclick="closeHelp()">Got it — Start Playing</button>
+        <button class="close-btn" onclick="closeHelp()">
+          Got it — Start Playing
+        </button>
       </div>
     </div>
 
     <button class="configToggle" onclick="toggleConfig()">Config</button>
-    <button id="pauseBtn" class="pauseBtn" onclick="togglePause()" disabled>Pause</button>
+    <button id="pauseBtn" class="pauseBtn" onclick="togglePause()" disabled>
+      Pause
+    </button>
     <button class="restartBtn" onclick="restartSession()">Restart</button>
     <button id="helpBtn" class="helpBtn" onclick="openHelp()">?</button>
-    <button id="edgeFailedBtn" class="edgeFailedBtn" onclick="edgeFailed()">⚠ Edge Failed</button>
+    <button id="edgeFailedBtn" class="edgeFailedBtn" onclick="edgeFailed()">
+      ⚠ Edge Failed
+    </button>
 
     <div class="container">
       <div id="state">Idle</div>
@@ -349,7 +552,7 @@
       <!-- Last-edge punishment banner -->
       <div id="punishmentBanner"></div>
 
-      <div id="statusPanel" style="display:none">
+      <div id="statusPanel" style="display: none">
         <div class="status-row">
           <span class="status-label">Edge Until</span>
           <span class="status-value" id="st-until">—</span>
@@ -402,112 +605,122 @@
         <label>Total Edges</label>
         <input id="totalEdges" type="number" value="5" />
         <label>Rest Skip Chance %</label>
-        <input id="initRestSkipChance" type="number" value="0" min="0" max="100" />
+        <input
+          id="initRestSkipChance"
+          type="number"
+          value="0"
+          min="0"
+          max="100"
+        />
         <label>Orgasm Chance %</label>
         <input id="orgasmChance" type="number" value="50" min="0" max="100" />
         <label></label>
-        <button style="grid-column: span 4" onclick="randomizeAll()">Randomize Parameters</button>
+        <button style="grid-column: span 4" onclick="randomizeAll()">
+          Randomize Parameters
+        </button>
       </div>
     </div>
 
     <script>
       // ─────────────────────────────────────────────────────────────────────
-      // RANDOMIZATION BOUNDS
+      // PARAMETER DEFINITIONS
+      // Each entry defines: default value, randomization range, and which
+      // HTML input id it maps to. Range params also have a `pad` range so
+      // the max is always meaningfully larger than the min.
       // ─────────────────────────────────────────────────────────────────────
-      const RAND_UNTIL_MIN_LO     = 3;
-      const RAND_UNTIL_MIN_HI     = 8;
-      const RAND_UNTIL_MAX_PAD_LO = 2;
-      const RAND_UNTIL_MAX_PAD_HI = 10;
-      const RAND_DUR_MIN_LO       = 1;
-      const RAND_DUR_MIN_HI       = 3;
-      const RAND_DUR_MAX_PAD_LO   = 1;
-      const RAND_DUR_MAX_PAD_HI   = 5;
-      const RAND_REST_MIN_LO      = 10;
-      const RAND_REST_MIN_HI      = 25;
-      const RAND_REST_MAX_PAD_LO  = 10;
-      const RAND_REST_MAX_PAD_HI  = 40;
-      const RAND_EDGES_LO         = 5;
-      const RAND_EDGES_HI         = 12;
+      const PARAMS = {
+        untilMin: { id: "untilMin", default: 2, rand: [3, 8] },
+        untilMax: { id: "untilMax", default: 6, pad: [2, 10] }, // rand = untilMin + pad
+        durMin: { id: "durMin", default: 2, rand: [1, 3] },
+        durMax: { id: "durMax", default: 8, pad: [1, 5] }, // rand = durMin + pad
+        restMin: { id: "restMin", default: 30, rand: [10, 25] },
+        restMax: { id: "restMax", default: 90, pad: [10, 40] }, // rand = restMin + pad
+        totalEdges: { id: "totalEdges", default: 5, rand: [5, 12] },
+        initRestSkipChance: {
+          id: "initRestSkipChance",
+          default: 0,
+          rand: [0, 30],
+        },
+        orgasmChance: { id: "orgasmChance", default: 50, rand: [10, 90] },
+      };
 
-      // Extra edges added when the very last edge is failed
-      const LAST_EDGE_FAIL_PENALTY = 2;
-
-      // ─────────────────────────────────────────────────────────────────────
-      // DEFAULT INPUT VALUES
-      // ─────────────────────────────────────────────────────────────────────
-      const DEFAULT_UNTIL_MIN        = 2;
-      const DEFAULT_UNTIL_MAX        = 6;
-      const DEFAULT_DUR_MIN          = 2;
-      const DEFAULT_DUR_MAX          = 8;
-      const DEFAULT_REST_MIN         = 30;
-      const DEFAULT_REST_MAX         = 90;
-      const DEFAULT_TOTAL_EDGES      = 5;
-      const DEFAULT_INIT_REST_SKIP   = 0;   // starting restSkipChance (%)
-      const DEFAULT_ORGASM_CHANCE    = 50;  // orgasm chance (%)
+      // Misc session constants
+      const LAST_EDGE_FAIL_PENALTY = 2; // extra edges added when the last edge is failed
 
       // ─────────────────────────────────────────────────────────────────────
       // RUNTIME STATE
       // ─────────────────────────────────────────────────────────────────────
-      let edgesLeft = DEFAULT_TOTAL_EDGES;
+      let edgesLeft = PARAMS.totalEdges.default;
       let timerInterval = null;
-      let currentState  = null;
+      let currentState = null;
 
       let preEdgeTimerEndTime = null;
-      let edgeDelaySec        = 0;
+      let edgeDelaySec = 0;
 
       // ── Penalty system ───────────────────────────────────────────────────
-      let restSkipChance      = 0;    // % chance the next rest is skipped
-      let nextRestModifier    = 1;    // multiplier on the next rest duration
-      let edgeEndTime         = null; // timestamp when the current edge ends
-      let sessionOrgasmChance = DEFAULT_ORGASM_CHANCE; // locked in at session start
+      let restSkipChance = 0; // % chance the next rest is skipped (accumulated)
+      let nextRestModifier = 1; // multiplier on the next rest duration
+      let edgeEndTime = null; // timestamp when the current edge ends
+      let sessionOrgasmChance = PARAMS.orgasmChance.default; // locked in at session start
       // ─────────────────────────────────────────────────────────────────────
 
-      const startBtn         = document.getElementById("startButton");
-      const stateLabel       = document.getElementById("state");
-      const progressText     = document.getElementById("progressText");
-      const configBtn        = document.querySelector(".configToggle");
-      const configPanel      = document.getElementById("config");
-      const pauseBtn         = document.getElementById("pauseBtn");
-      const edgeFailedBtn    = document.getElementById("edgeFailedBtn");
-      const statusPanel      = document.getElementById("statusPanel");
+      const startBtn = document.getElementById("startButton");
+      const stateLabel = document.getElementById("state");
+      const progressText = document.getElementById("progressText");
+      const configBtn = document.querySelector(".configToggle");
+      const configPanel = document.getElementById("config");
+      const pauseBtn = document.getElementById("pauseBtn");
+      const edgeFailedBtn = document.getElementById("edgeFailedBtn");
+      const statusPanel = document.getElementById("statusPanel");
       const punishmentBanner = document.getElementById("punishmentBanner");
-      const orgasmResult     = document.getElementById("orgasmResult");
+      const orgasmResult = document.getElementById("orgasmResult");
 
       // ─────────────────────────────────────────────────────────────────────
       // STATUS PANEL
       // ─────────────────────────────────────────────────────────────────────
       function updateStatusPanel() {
         document.getElementById("st-until").textContent =
-          document.getElementById("untilMin").value + "–" +
-          document.getElementById("untilMax").value + " min";
+          document.getElementById("untilMin").value +
+          "–" +
+          document.getElementById("untilMax").value +
+          " min";
         document.getElementById("st-dur").textContent =
-          document.getElementById("durMin").value + "–" +
-          document.getElementById("durMax").value + " min";
+          document.getElementById("durMin").value +
+          "–" +
+          document.getElementById("durMax").value +
+          " min";
         document.getElementById("st-rest").textContent =
-          document.getElementById("restMin").value + "–" +
-          document.getElementById("restMax").value + " sec";
+          document.getElementById("restMin").value +
+          "–" +
+          document.getElementById("restMax").value +
+          " sec";
         document.getElementById("st-edges").textContent = edgesLeft;
-        document.getElementById("st-skip").textContent  = restSkipChance + "%";
-        document.getElementById("st-mod").textContent   = "×" + nextRestModifier.toFixed(2);
+        document.getElementById("st-skip").textContent = restSkipChance + "%";
+        document.getElementById("st-mod").textContent =
+          "×" + nextRestModifier.toFixed(2);
 
         document.getElementById("st-skip-row").style.opacity =
-          restSkipChance > 0     ? "1" : "0.35";
-        document.getElementById("st-mod-row").style.opacity  =
+          restSkipChance > 0 ? "1" : "0.35";
+        document.getElementById("st-mod-row").style.opacity =
           nextRestModifier !== 1 ? "1" : "0.35";
-        document.getElementById("st-orgasm").textContent = sessionOrgasmChance + "%";
+        document.getElementById("st-orgasm").textContent =
+          sessionOrgasmChance + "%";
       }
 
-      let isPaused           = false;
+      let isPaused = false;
       let pausedRemainingSec = 0;
-      let pausedOnComplete   = null;
+      let pausedOnComplete = null;
 
       // ─────────────────────────────────────────────────────────────────────
       // HELPERS
       // ─────────────────────────────────────────────────────────────────────
-      function setState(name) { stateLabel.textContent = name; }
+      function setState(name) {
+        stateLabel.textContent = name;
+      }
 
       function rand(min, max) {
-        min = Number(min); max = Number(max);
+        min = Number(min);
+        max = Number(max);
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
@@ -527,34 +740,44 @@
 
       function hidePunishmentBanner() {
         punishmentBanner.style.display = "none";
-        punishmentBanner.textContent   = "";
+        punishmentBanner.textContent = "";
       }
 
       function randomizeAll() {
-        const untilMin = rand(RAND_UNTIL_MIN_LO, RAND_UNTIL_MIN_HI);
-        const untilMax = rand(untilMin + RAND_UNTIL_MAX_PAD_LO, untilMin + RAND_UNTIL_MAX_PAD_HI);
-        const durMin   = rand(RAND_DUR_MIN_LO, RAND_DUR_MIN_HI);
-        const durMax   = rand(durMin + RAND_DUR_MAX_PAD_LO, durMin + RAND_DUR_MAX_PAD_HI);
-        const restMin  = rand(RAND_REST_MIN_LO, RAND_REST_MIN_HI);
-        const restMax  = rand(restMin + RAND_REST_MAX_PAD_LO, restMin + RAND_REST_MAX_PAD_HI);
-        const totalEdgesRandom = rand(RAND_EDGES_LO, RAND_EDGES_HI);
+        const p = PARAMS;
 
-        document.getElementById("untilMin").value   = untilMin;
-        document.getElementById("untilMax").value   = untilMax;
-        document.getElementById("durMin").value     = durMin;
-        document.getElementById("durMax").value     = durMax;
-        document.getElementById("restMin").value    = restMin;
-        document.getElementById("restMax").value    = restMax;
-        document.getElementById("totalEdges").value = totalEdgesRandom;
+        const untilMin = rand(...p.untilMin.rand);
+        const untilMax = untilMin + rand(...p.untilMax.pad);
+        const durMin = rand(...p.durMin.rand);
+        const durMax = durMin + rand(...p.durMax.pad);
+        const restMin = rand(...p.restMin.rand);
+        const restMax = restMin + rand(...p.restMax.pad);
 
-        edgesLeft = totalEdgesRandom;
-        document.getElementById("count").textContent = "Edges Left: " + edgesLeft;
+        document.getElementById(p.untilMin.id).value = untilMin;
+        document.getElementById(p.untilMax.id).value = untilMax;
+        document.getElementById(p.durMin.id).value = durMin;
+        document.getElementById(p.durMax.id).value = durMax;
+        document.getElementById(p.restMin.id).value = restMin;
+        document.getElementById(p.restMax.id).value = restMax;
+        document.getElementById(p.totalEdges.id).value = rand(
+          ...p.totalEdges.rand,
+        );
+        document.getElementById(p.initRestSkipChance.id).value = rand(
+          ...p.initRestSkipChance.rand,
+        );
+        document.getElementById(p.orgasmChance.id).value = rand(
+          ...p.orgasmChance.rand,
+        );
+
+        edgesLeft = Number(document.getElementById(p.totalEdges.id).value);
+        document.getElementById("count").textContent =
+          "Edges Left: " + edgesLeft;
         currentState = null;
         setState("Idle");
         resetProgress();
         startBtn.textContent = "Start Session";
-        preEdgeTimerEndTime  = null;
-        edgeDelaySec         = 0;
+        preEdgeTimerEndTime = null;
+        edgeDelaySec = 0;
       }
 
       // ─────────────────────────────────────────────────────────────────────
@@ -604,29 +827,24 @@
 
         if (remainingSeconds < 30) {
           restSkipChance += 5;
-
         } else if (remainingSeconds < 60) {
           restSkipChance += 5;
           durMaxEl.value = Number(durMaxEl.value) + 1;
-
         } else if (remainingMinutes < 2) {
           restSkipChance += 10;
           durMinEl.value = Number(durMinEl.value) + 1;
           durMaxEl.value = Number(durMaxEl.value) + 2;
           nextRestModifier *= 0.9;
-
         } else if (remainingMinutes < 3) {
           restSkipChance += 20;
           durMinEl.value = Number(durMinEl.value) + 1;
           durMaxEl.value = Number(durMaxEl.value) + 2;
           nextRestModifier *= 0.8;
-
         } else if (remainingMinutes < 4) {
           restSkipChance += 20;
           durMinEl.value = Number(durMinEl.value) + 2;
           durMaxEl.value = Number(durMaxEl.value) + 2;
           nextRestModifier *= 0.7;
-
         } else {
           // Tier 6: 4+ min
           restSkipChance += 40;
@@ -643,31 +861,44 @@
         if (wasLastEdge) {
           edgesLeft += LAST_EDGE_FAIL_PENALTY;
           showPunishmentBanner(
-            "⚠ You failed the last edge! +" + LAST_EDGE_FAIL_PENALTY +
-            " punishment edges added — you're not finished yet."
+            "⚠ You failed the last edge! +" +
+              LAST_EDGE_FAIL_PENALTY +
+              " punishment edges added — you're not finished yet.",
           );
         } else {
           hidePunishmentBanner();
         }
 
         // Sync edge counter display
-        document.getElementById("count").textContent = "Edges Left: " + edgesLeft;
+        document.getElementById("count").textContent =
+          "Edges Left: " + edgesLeft;
 
         // Build tier label for output message
         const tierLabel =
-          remainingSeconds < 30 ? "< 30s"    :
-          remainingSeconds < 60 ? "30s–1min" :
-          remainingMinutes < 2  ? "1–2 min"  :
-          remainingMinutes < 3  ? "2–3 min"  :
-          remainingMinutes < 4  ? "3–4 min"  :
-                                  "4+ min";
+          remainingSeconds < 30
+            ? "< 30s"
+            : remainingSeconds < 60
+              ? "30s–1min"
+              : remainingMinutes < 2
+                ? "1–2 min"
+                : remainingMinutes < 3
+                  ? "2–3 min"
+                  : remainingMinutes < 4
+                    ? "3–4 min"
+                    : "4+ min";
 
         let penaltyMsg =
-          "Edge failed! (" + tierLabel + " left)" +
-          " — skip chance: " + restSkipChance + "%" +
-          " | next rest ×" + nextRestModifier.toFixed(2);
-        if (extraEdge)   penaltyMsg += " | +1 edge added";
-        if (wasLastEdge) penaltyMsg += " | +" + LAST_EDGE_FAIL_PENALTY + " punishment edges!";
+          "Edge failed! (" +
+          tierLabel +
+          " left)" +
+          " — skip chance: " +
+          restSkipChance +
+          "%" +
+          " | next rest ×" +
+          nextRestModifier.toFixed(2);
+        if (extraEdge) penaltyMsg += " | +1 edge added";
+        if (wasLastEdge)
+          penaltyMsg += " | +" + LAST_EDGE_FAIL_PENALTY + " punishment edges!";
 
         document.getElementById("output").textContent = penaltyMsg;
         updateStatusPanel();
@@ -705,7 +936,8 @@
         currentState = null;
         setState("Idle");
 
-        document.getElementById("count").textContent = "Edges Left: " + edgesLeft;
+        document.getElementById("count").textContent =
+          "Edges Left: " + edgesLeft;
         document.getElementById("output").textContent = "";
 
         resetProgress();
@@ -713,14 +945,14 @@
         preEdgeTimerEndTime = null;
         edgeDelaySec = 0;
 
-        restSkipChance   = 0;
+        restSkipChance = 0;
         nextRestModifier = 1;
-        edgeEndTime      = null;
-        sessionOrgasmChance = DEFAULT_ORGASM_CHANCE;
+        edgeEndTime = null;
+        sessionOrgasmChance = PARAMS.orgasmChance.default;
         edgeFailedBtn.style.display = "none";
-        statusPanel.style.display   = "none";
-        orgasmResult.style.display  = "none";
-        orgasmResult.className      = "";
+        statusPanel.style.display = "none";
+        orgasmResult.style.display = "none";
+        orgasmResult.className = "";
         hidePunishmentBanner();
       }
 
@@ -729,7 +961,7 @@
 
         if (edgesLeft <= 0) {
           // ── ORGASM ROLL ───────────────────────────────────────────────────
-          const roll    = rand(1, 100);
+          const roll = rand(1, 100);
           const allowed = roll <= sessionOrgasmChance;
 
           document.getElementById("output").textContent = "Session complete!";
@@ -743,15 +975,22 @@
           pauseBtn.classList.remove("paused");
 
           // Show orgasm verdict
-          const resultEl  = orgasmResult;
+          const resultEl = orgasmResult;
           const verdictEl = document.getElementById("orgasmVerdict");
-          const detailEl  = document.getElementById("orgasmDetail");
+          const detailEl = document.getElementById("orgasmDetail");
 
           resultEl.className = allowed ? "allowed" : "denied";
-          verdictEl.textContent = allowed ? "✓ Orgasm Allowed" : "✗ Orgasm Denied";
-          detailEl.textContent  =
-            "Rolled " + roll + " — needed ≤ " + sessionOrgasmChance +
-            " (" + sessionOrgasmChance + "% chance)";
+          verdictEl.textContent = allowed
+            ? "✓ Orgasm Allowed"
+            : "✗ Orgasm Denied";
+          detailEl.textContent =
+            "Rolled " +
+            roll +
+            " — needed ≤ " +
+            sessionOrgasmChance +
+            " (" +
+            sessionOrgasmChance +
+            "% chance)";
 
           // Re-trigger animation
           resultEl.style.animation = "none";
@@ -771,10 +1010,21 @@
 
             // Snapshot config inputs into runtime vars so mid-session edits
             // to the config fields have no effect until the next session
-            restSkipChance      = Math.min(100, Math.max(0,
-              Number(document.getElementById("initRestSkipChance").value) || 0));
-            sessionOrgasmChance = Math.min(100, Math.max(0,
-              Number(document.getElementById("orgasmChance").value) || 0));
+            restSkipChance = Math.min(
+              100,
+              Math.max(
+                0,
+                Number(document.getElementById("initRestSkipChance").value) ||
+                  0,
+              ),
+            );
+            sessionOrgasmChance = Math.min(
+              100,
+              Math.max(
+                0,
+                Number(document.getElementById("orgasmChance").value) || 0,
+              ),
+            );
           }
           currentState = "Pre-Edge";
           setState("Pre-Edge");
@@ -789,20 +1039,24 @@
             "Edge! you only have " + duration + " min";
           startBtn.textContent = "Edge";
           updateStatusPanel();
-          startProgress(duration * 60, () => { preEdgeTimerEndTime = Date.now(); });
-
+          startProgress(duration * 60, () => {
+            preEdgeTimerEndTime = Date.now();
+          });
         } else if (currentState === "Pre-Edge") {
           // ── EDGING ────────────────────────────────────────────────────────
           currentState = "Edging";
           setState("Edging");
 
-          edgeDelaySec = preEdgeTimerEndTime !== null
-            ? (Date.now() - preEdgeTimerEndTime) / 1000 : 0;
+          edgeDelaySec =
+            preEdgeTimerEndTime !== null
+              ? (Date.now() - preEdgeTimerEndTime) / 1000
+              : 0;
 
           edgesLeft--;
-          document.getElementById("count").textContent = "Edges Left: " + edgesLeft;
+          document.getElementById("count").textContent =
+            "Edges Left: " + edgesLeft;
 
-          const baseDuration   = rand(
+          const baseDuration = rand(
             document.getElementById("durMin").value,
             document.getElementById("durMax").value,
           );
@@ -810,15 +1064,18 @@
           edgeEndTime = Date.now() + edgingDuration * 1000;
 
           document.getElementById("output").textContent =
-            "Stay at the edge for " + baseDuration + " min" +
-            (edgeDelaySec > 0 ? " (+" + edgeDelaySec.toFixed(1) + "s delay added)" : "");
+            "Stay at the edge for " +
+            baseDuration +
+            " min" +
+            (edgeDelaySec > 0
+              ? " (+" + edgeDelaySec.toFixed(1) + "s delay added)"
+              : "");
 
           startBtn.textContent = "Stay.";
-          startBtn.disabled    = true;
+          startBtn.disabled = true;
           edgeFailedBtn.style.display = "block";
           updateStatusPanel();
           startProgress(edgingDuration);
-
         } else if (currentState === "Edging") {
           // ── RESTING ───────────────────────────────────────────────────────
           edgeFailedBtn.style.display = "none";
@@ -830,8 +1087,10 @@
           // Rest skip roll
           if (restSkipChance > 0 && rand(0, 100) < restSkipChance) {
             document.getElementById("output").textContent =
-              "Rest skipped! (" + restSkipChance + "% chance) Penalty carries on…";
-            nextRestModifier  = 1;
+              "Rest skipped! (" +
+              restSkipChance +
+              "% chance) Penalty carries on…";
+            nextRestModifier = 1;
             startBtn.textContent = "Next Edge";
             updateStatusPanel();
             startProgress(2, () => {
@@ -846,14 +1105,16 @@
             document.getElementById("restMin").value,
             document.getElementById("restMax").value,
           );
-          const adjustedRest    = Math.max(0, baseRestDuration - edgeDelaySec);
+          const adjustedRest = Math.max(0, baseRestDuration - edgeDelaySec);
           const appliedModifier = nextRestModifier;
-          const restDuration    = Math.max(0, adjustedRest * appliedModifier);
+          const restDuration = Math.max(0, adjustedRest * appliedModifier);
           nextRestModifier = 1;
 
           let restNote = "";
-          if (edgeDelaySec > 0)   restNote += " (-" + edgeDelaySec.toFixed(1) + "s delay removed)";
-          if (appliedModifier !== 1) restNote += " (×" + appliedModifier.toFixed(2) + " penalty)";
+          if (edgeDelaySec > 0)
+            restNote += " (-" + edgeDelaySec.toFixed(1) + "s delay removed)";
+          if (appliedModifier !== 1)
+            restNote += " (×" + appliedModifier.toFixed(2) + " penalty)";
 
           document.getElementById("output").textContent =
             "Rest for " + restDuration.toFixed(1) + " sec" + restNote;
@@ -879,14 +1140,15 @@
         pausedOnComplete = onComplete || null;
 
         const progressBar = document.getElementById("progressBar");
-        const startTime   = Date.now();
-        const totalMs     = seconds * 1000;
+        const startTime = Date.now();
+        const totalMs = seconds * 1000;
 
         timerInterval = setInterval(() => {
           const elapsedMs = Date.now() - startTime;
           const remaining = (totalMs - elapsedMs) / 1000;
 
-          progressBar.style.width  = Math.min((elapsedMs / totalMs) * 100, 100) + "%";
+          progressBar.style.width =
+            Math.min((elapsedMs / totalMs) * 100, 100) + "%";
           progressText.textContent = formatTime(Math.max(0, remaining));
 
           if (elapsedMs >= totalMs) {
@@ -906,8 +1168,12 @@
       // ─────────────────────────────────────────────────────────────────────
       // HELP OVERLAY
       // ─────────────────────────────────────────────────────────────────────
-      function closeHelp() { document.getElementById("helpOverlay").style.display = "none"; }
-      function openHelp()  { document.getElementById("helpOverlay").style.display = "flex"; }
+      function closeHelp() {
+        document.getElementById("helpOverlay").style.display = "none";
+      }
+      function openHelp() {
+        document.getElementById("helpOverlay").style.display = "flex";
+      }
 
       // ─────────────────────────────────────────────────────────────────────
       // INIT
