@@ -355,10 +355,12 @@
         <div class="status-row"><span class="status-label">Edge Until</span>    <span class="status-value" id="st-until">—</span></div>
         <div class="status-row"><span class="status-label">Edge Duration</span> <span class="status-value" id="st-dur">—</span></div>
         <div class="status-row"><span class="status-label">Rest Duration</span> <span class="status-value" id="st-rest">—</span></div>
-        <div class="status-row"><span class="status-label">Edges Left</span>    <span class="status-value" id="st-edges">—</span></div>
+        <div class="status-row"><span class="status-label" id="st-edges-label">Edges Left</span><span class="status-value" id="st-edges">—</span></div>
+        <div class="status-row" id="st-orgasms-left-row" style="display:none"><span class="status-label">Orgasms Left</span><span class="status-value" id="st-orgasms-left">—</span></div>
+        <div class="status-row" id="st-edgeskip-row" style="display:none"><span class="status-label">Edging Skip Chance</span><span class="status-value status-penalty" id="st-edgeskip">0%</span></div>
         <div class="status-row" id="st-skip-row"><span class="status-label">Rest Skip Chance</span>  <span class="status-value status-penalty" id="st-skip">0%</span></div>
         <div class="status-row" id="st-mod-row"> <span class="status-label">Next Rest Modifier</span><span class="status-value status-penalty" id="st-mod">×1.00</span></div>
-        <div class="status-row"><span class="status-label">Orgasm Chance</span> <span class="status-value" id="st-orgasm">—</span></div>
+        <div class="status-row" id="st-orgasm-row"><span class="status-label">Orgasm Chance</span><span class="status-value" id="st-orgasm">—</span></div>
       </div>
 
       <div id="orgasmResult">
@@ -377,6 +379,17 @@
         <label>Total Edges</label>       <input id="totalEdges" type="number" value="5" onchange="onTotalEdgesChange()" />
         <label>Rest Skip Chance %</label><input id="initRestSkipChance" type="number" value="0" min="0" max="100" onchange="onSkipChanceChange()" />
         <label>Orgasm Chance %</label>   <input id="orgasmChance" type="number" value="50" min="0" max="100" onchange="onOrgasmChanceChange()" />
+        <!-- Multi-orgasm toggle: spans full row -->
+        <label style="grid-column:span 3;display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="multiOrgasmMode" onchange="onMultiOrgasmToggle()" style="width:auto;margin:0;accent-color:#ff0000;" />
+          Multiple Orgasm Mode
+        </label>
+        <span></span>
+        <!-- Conditional multi-orgasm params -->
+        <label id="cfg-totalOrgasms-label" style="display:none">Total Orgasms</label>
+        <input id="totalOrgasms" type="number" value="3" min="1" onchange="onTotalOrgasmsChange()" style="display:none" />
+        <label id="cfg-edgeSkipChance-label" style="display:none">Edging Skip %</label>
+        <input id="edgeSkipChance" type="number" value="20" min="0" max="100" onchange="onEdgeSkipChanceChange()" style="display:none" />
         <label></label>
         <button style="grid-column:span 4" onclick="randomizeAll()">Randomize Parameters</button>
       </div>
@@ -394,6 +407,8 @@
         totalEdges:         { id: "totalEdges",         default: 5,  rand: [5, 12] },
         initRestSkipChance: { id: "initRestSkipChance", default: 0,  rand: [0, 30] },
         orgasmChance:       { id: "orgasmChance",       default: 50, rand: [10, 90] },
+        totalOrgasms:       { id: "totalOrgasms",       default: 3,  rand: [2, 6]  },
+        edgeSkipChance:     { id: "edgeSkipChance",     default: 20, rand: [0, 50] },
       };
 
       const LAST_EDGE_FAIL_PENALTY = 2;
@@ -423,6 +438,11 @@
         restSkipChance:     0,
         nextRestModifier:   1,
         orgasmChance:       PARAMS.orgasmChance.default,
+        // multi-orgasm
+        multiOrgasmMode:    false,
+        orgasmsLeft:        PARAMS.totalOrgasms.default,
+        edgeSkipChance:     PARAMS.edgeSkipChance.default,
+        inOrgasmCycle:      false, // true when we're inside a pre-edge→edging→orgasm→rest loop
       };
 
       // ─── DOM References ───────────────────────────────────────────────────
@@ -443,6 +463,12 @@
         orgasmVerdict:   document.getElementById("orgasmVerdict"),
         orgasmDetail:    document.getElementById("orgasmDetail"),
         restartBtn:      document.querySelector(".restartBtn"),
+        // multi-orgasm config rows
+        multiOrgasmToggle:      document.getElementById("multiOrgasmMode"),
+        totalOrgasmsLabel:      document.getElementById("cfg-totalOrgasms-label"),
+        totalOrgasmsInput:      document.getElementById("totalOrgasms"),
+        edgeSkipChanceLabel:    document.getElementById("cfg-edgeSkipChance-label"),
+        edgeSkipChanceInput:    document.getElementById("edgeSkipChance"),
       };
 
       // ─── Utility ──────────────────────────────────────────────────────────
@@ -464,7 +490,11 @@
       function setOutput(msg) { dom.output.textContent = msg; }
 
       function setCount() {
-        dom.count.textContent = "Edges Left: " + session.edgesLeft;
+        if (session.multiOrgasmMode && session.inOrgasmCycle) {
+          dom.count.textContent = "Orgasms Left: " + session.orgasmsLeft;
+        } else {
+          dom.count.textContent = "Edges Left: " + session.edgesLeft;
+        }
       }
 
       function flashElement(el) {
@@ -495,9 +525,23 @@
         document.getElementById("st-edges").textContent  = session.edgesLeft;
         document.getElementById("st-skip").textContent   = session.restSkipChance + "%";
         document.getElementById("st-mod").textContent    = "×" + session.nextRestModifier.toFixed(2);
-        document.getElementById("st-orgasm").textContent = session.orgasmChance + "%";
-        document.getElementById("st-skip-row").style.opacity = session.restSkipChance > 0        ? "1" : "0.35";
-        document.getElementById("st-mod-row").style.opacity  = session.nextRestModifier !== 1    ? "1" : "0.35";
+        document.getElementById("st-skip-row").style.opacity = session.restSkipChance > 0     ? "1" : "0.35";
+        document.getElementById("st-mod-row").style.opacity  = session.nextRestModifier !== 1 ? "1" : "0.35";
+
+        if (session.multiOrgasmMode) {
+          document.getElementById("st-orgasm-row").style.display      = "none";
+          document.getElementById("st-orgasms-left-row").style.display = "flex";
+          document.getElementById("st-orgasms-left").textContent       = session.orgasmsLeft;
+          document.getElementById("st-edgeskip-row").style.display     = "flex";
+          document.getElementById("st-edgeskip").textContent           = session.edgeSkipChance + "%";
+          document.getElementById("st-edges-label").textContent        = session.inOrgasmCycle ? "Edges This Cycle" : "Edges Left";
+        } else {
+          document.getElementById("st-orgasm-row").style.display      = "";
+          document.getElementById("st-orgasms-left-row").style.display = "none";
+          document.getElementById("st-edgeskip-row").style.display     = "none";
+          document.getElementById("st-orgasm").textContent             = session.orgasmChance + "%";
+          document.getElementById("st-edges-label").textContent        = "Edges Left";
+        }
       }
 
       // ─── Progress Bar ─────────────────────────────────────────────────────
@@ -619,6 +663,23 @@
         startProgress(totalDur);
       }
 
+      // ── Orgasm state (multi-orgasm mode only) ─────────────────────────────
+      // After Edging completes, player confirms the orgasm then rest follows.
+      function startOrgasmState() {
+        setState("Orgasm");
+        showEdgeFailed(false);
+        session.edgeEndTime = null;
+
+        session.orgasmsLeft--;
+        setCount();
+
+        setOutput("Orgasm! Press confirm when done.");
+        dom.startBtn.textContent = "✓ Confirm Orgasm";
+        dom.startBtn.disabled = false;
+        updateStatusPanel();
+        resetProgress(); // no timer — player confirms manually
+      }
+
       function startResting() {
         setState("Resting");
         showEdgeFailed(false);
@@ -629,7 +690,7 @@
         if (session.restSkipChance > 0 && rand(0, 100) < session.restSkipChance) {
           setOutput(`Rest skipped! (${session.restSkipChance}% chance) Penalty carries on…`);
           session.nextRestModifier = 1;
-          dom.startBtn.textContent = "Next Edge";
+          dom.startBtn.textContent = session.multiOrgasmMode && session.inOrgasmCycle ? "Next Orgasm" : "Next Edge";
           updateStatusPanel();
           startProgress(2, () => {
             session.currentState = "Resting";
@@ -657,10 +718,21 @@
       }
 
       function finishSession() {
-        const roll    = rand(1, 100);
-        const allowed = roll <= session.orgasmChance;
+        if (session.multiOrgasmMode) {
+          // Multi-orgasm mode: all orgasms completed — always allowed
+          setOutput("All orgasms complete! Session finished.");
+          dom.orgasmResult.className = "allowed";
+          dom.orgasmVerdict.textContent = "✓ Session Complete";
+          dom.orgasmDetail.textContent  = `${cfg("totalOrgasms")} orgasm(s) achieved.`;
+        } else {
+          const roll    = rand(1, 100);
+          const allowed = roll <= session.orgasmChance;
+          setOutput("Session complete!");
+          dom.orgasmResult.className    = allowed ? "allowed" : "denied";
+          dom.orgasmVerdict.textContent = allowed ? "✓ Orgasm Allowed" : "✗ Orgasm Denied";
+          dom.orgasmDetail.textContent  = `Rolled ${roll} — needed ≤ ${session.orgasmChance} (${session.orgasmChance}% chance)`;
+        }
 
-        setOutput("Session complete!");
         dom.startBtn.textContent = "Restart Session";
         dom.startBtn.disabled = false;
         setState("Finished");
@@ -669,10 +741,6 @@
         dom.pauseBtn.disabled = true;
         dom.pauseBtn.textContent = "Pause";
         dom.pauseBtn.classList.remove("paused");
-
-        dom.orgasmResult.className = allowed ? "allowed" : "denied";
-        dom.orgasmVerdict.textContent = allowed ? "✓ Orgasm Allowed" : "✗ Orgasm Denied";
-        dom.orgasmDetail.textContent  = `Rolled ${roll} — needed ≤ ${session.orgasmChance} (${session.orgasmChance}% chance)`;
         flashElement(dom.orgasmResult);
         dom.orgasmResult.style.display = "block";
       }
@@ -681,9 +749,52 @@
       function nextState() {
         dom.startBtn.disabled = false;
 
+        // ── Multi-orgasm mode ──────────────────────────────────────────────
+        if (session.multiOrgasmMode) {
+          // Orgasm cycle finished → check if more orgasms remain
+          if (session.currentState === "Orgasm") {
+            if (session.orgasmsLeft <= 0) return finishSession();
+            // Start next orgasm cycle: reset edges for this cycle
+            session.inOrgasmCycle = true;
+            session.edgesLeft = cfg("totalEdges");
+            setCount();
+            startResting(); // rest between orgasm cycles
+            return;
+          }
+
+          // Inside an orgasm cycle — after rest, start next pre-edge
+          if (session.currentState === "Resting") {
+            // If edging skip chance fires, go straight to orgasm state
+            if (session.edgeSkipChance > 0 && rand(0, 100) < session.edgeSkipChance) {
+              setOutput(`Edging skipped! (${session.edgeSkipChance}% chance)`);
+              session.edgesLeft = 0; // mark cycle as done
+              setCount();
+              setTimeout(startOrgasmState, 800);
+              return;
+            }
+            startPreEdge();
+            return;
+          }
+
+          if (session.currentState === null) { initSession(); session.inOrgasmCycle = false; startPreEdge(); return; }
+          if (session.currentState === "Pre-Edge") { startEdging(); return; }
+
+          // Edging done — check if edges in this cycle are exhausted
+          if (session.currentState === "Edging") {
+            if (session.edgesLeft <= 0) {
+              startOrgasmState();
+            } else {
+              startResting();
+            }
+            return;
+          }
+          return;
+        }
+
+        // ── Normal mode ────────────────────────────────────────────────────
         if (session.edgesLeft <= 0) return finishSession();
 
-        if (session.currentState === null)         { initSession(); startPreEdge(); }
+        if (session.currentState === null)          { initSession(); startPreEdge(); }
         else if (session.currentState === "Resting")  startPreEdge();
         else if (session.currentState === "Pre-Edge") startEdging();
         else if (session.currentState === "Edging")   startResting();
@@ -695,13 +806,21 @@
         dom.pauseBtn.disabled = false;
         dom.statusPanel.style.display = "block";
 
+        session.multiOrgasmMode = dom.multiOrgasmToggle.checked;
         session.restSkipChance  = clamp(cfg("initRestSkipChance") || 0, 0, 100);
         session.orgasmChance    = clamp(cfg("orgasmChance") || 0, 0, 100);
+
+        if (session.multiOrgasmMode) {
+          session.orgasmsLeft    = Math.max(1, cfg("totalOrgasms"));
+          session.edgeSkipChance = clamp(cfg("edgeSkipChance") || 0, 0, 100);
+          session.inOrgasmCycle  = false;
+          session.edgesLeft      = cfg("totalEdges");
+        }
       }
 
       // ─── Session Control ─────────────────────────────────────────────────
       function handleButton() {
-        (session.currentState === "Finished" || session.edgesLeft <= 0)
+        (session.currentState === "Finished" || (!session.multiOrgasmMode && session.edgesLeft <= 0))
           ? restartSession()
           : nextState();
       }
@@ -721,6 +840,10 @@
           restSkipChance:     0,
           nextRestModifier:   1,
           orgasmChance:       PARAMS.orgasmChance.default,
+          multiOrgasmMode:    false,
+          orgasmsLeft:        cfg("totalOrgasms") || PARAMS.totalOrgasms.default,
+          edgeSkipChance:     cfg("edgeSkipChance") || PARAMS.edgeSkipChance.default,
+          inOrgasmCycle:      false,
         });
 
         dom.startBtn.disabled   = false;
@@ -760,11 +883,18 @@
           session.isPaused = false;
           dom.pauseBtn.textContent = "Pause";
           dom.pauseBtn.classList.remove("paused");
-          dom.startBtn.disabled   = session.currentState === "Edging";
           dom.restartBtn.disabled = false;
-          if (session.currentState === "Edging") showEdgeFailed(true);
+
+          const isEdging = session.currentState === "Edging";
+          const isOrgasm = session.currentState === "Orgasm";
+          dom.startBtn.disabled = isEdging;
+          if (isEdging) showEdgeFailed(true);
           setState(session.currentState);
-          startProgress(session.pausedRemaining, session.pausedOnComplete);
+
+          // Orgasm state has no running timer — don't restart progress
+          if (!isOrgasm) {
+            startProgress(session.pausedRemaining, session.pausedOnComplete);
+          }
         }
       }
 
@@ -790,8 +920,14 @@
         setCfg(p.totalEdges.id,         rand(...p.totalEdges.rand));
         setCfg(p.initRestSkipChance.id, rand(...p.initRestSkipChance.rand));
         setCfg(p.orgasmChance.id,       rand(...p.orgasmChance.rand));
+        setCfg(p.totalOrgasms.id,       rand(...p.totalOrgasms.rand));
+        setCfg(p.edgeSkipChance.id,     rand(...p.edgeSkipChance.rand));
 
         session.edgesLeft = cfg(p.totalEdges.id);
+        if (dom.multiOrgasmToggle.checked) {
+          session.orgasmsLeft    = cfg(p.totalOrgasms.id);
+          session.edgeSkipChance = cfg(p.edgeSkipChance.id);
+        }
         session.currentState = null;
         dom.stateLabel.textContent = "Idle"; // don't call setState() — that would overwrite currentState: null
         setCount();
@@ -831,6 +967,33 @@
           session.orgasmChance = clamp(cfg("orgasmChance") || 0, 0, 100);
         }
         if (session.currentState !== null) updateStatusPanel();
+      }
+
+      // Show/hide multi-orgasm config rows and update session if idle.
+      function onMultiOrgasmToggle() {
+        const on = dom.multiOrgasmToggle.checked;
+        const multiRows = [
+          dom.totalOrgasmsLabel, dom.totalOrgasmsInput,
+          dom.edgeSkipChanceLabel, dom.edgeSkipChanceInput,
+        ];
+        multiRows.forEach(el => el.style.display = on ? "" : "none");
+        if (session.currentState === null) {
+          session.multiOrgasmMode = on;
+          session.orgasmsLeft     = on ? Math.max(1, cfg("totalOrgasms")) : PARAMS.totalOrgasms.default;
+          session.edgeSkipChance  = on ? clamp(cfg("edgeSkipChance") || 0, 0, 100) : PARAMS.edgeSkipChance.default;
+        }
+      }
+
+      function onTotalOrgasmsChange() {
+        if (session.currentState === null) {
+          session.orgasmsLeft = Math.max(1, cfg("totalOrgasms"));
+        }
+      }
+
+      function onEdgeSkipChanceChange() {
+        if (session.currentState === null) {
+          session.edgeSkipChance = clamp(cfg("edgeSkipChance") || 0, 0, 100);
+        }
       }
 
       // ─── Help Overlay ─────────────────────────────────────────────────────
